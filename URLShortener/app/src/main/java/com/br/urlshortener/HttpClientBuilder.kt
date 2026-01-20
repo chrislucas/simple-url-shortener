@@ -27,5 +27,4 @@ object HttpClientBuilder {
             .build()
             .create(T::class.java)
     }
-
 }

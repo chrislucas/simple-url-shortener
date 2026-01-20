@@ -97,6 +97,7 @@ dependencies {
     // https://mrmans0n.github.io/compose-rules/ktlint/
     detektPlugins("io.nlopez.compose.rules:detekt:0.5.3") // Use the latest version
     detektPlugins("dev.detekt:detekt-rules-ktlint-wrapper:2.0.0-alpha.1")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.6")
 
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter)
@@ -256,17 +257,18 @@ tasks.register("runAllCoverageAndReport") {
     https://github.com/detekt/detekt
  */
 detekt {
-    toolVersion = "2.0.0-alpha.1"
-    config.setFrom(file("config/detekt/detekt.yml"))
+    toolVersion = "1.23.8"
+    autoCorrect = true
+    parallel = true
+    config.setFrom(file("${rootProject.layout.projectDirectory}/config/detekt/detekt.yml"))
     buildUponDefaultConfig = true
 }
 
 // Kotlin DSL
 tasks.withType<Detekt>().configureEach {
     reports {
-        //checkstyle.required.set(true)
         html.required.set(true)
         sarif.required.set(true)
-        //markdown.required.set(true)
+        md.required.set(true)
     }
 }

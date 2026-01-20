@@ -3,8 +3,8 @@ package com.br.urlshortener.domain.repository
 import com.br.urlshortener.data.remote.UrlShortenerClient
 import com.br.urlshortener.data.remote.model.UrlShortenerDTO
 import com.br.urlshortener.domain.model.Link
-import com.br.urlshortener.domain.model.UrlShortener
 import com.br.urlshortener.domain.model.UrlResult
+import com.br.urlshortener.domain.model.UrlShortener
 
 class UrlShortenerRepositoryDefault(private val client: UrlShortenerClient) : UrlShortenerRepository {
 

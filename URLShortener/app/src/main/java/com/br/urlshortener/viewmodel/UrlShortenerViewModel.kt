@@ -7,8 +7,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.br.urlshortener.BuildConfig
 import com.br.urlshortener.HttpClientBuilder
 import com.br.urlshortener.data.remote.UrlShortenerClient
-import com.br.urlshortener.domain.model.UrlShortener
 import com.br.urlshortener.domain.model.UrlResult
+import com.br.urlshortener.domain.model.UrlShortener
 import com.br.urlshortener.domain.repository.UrlShortenerRepository
 import com.br.urlshortener.domain.repository.UrlShortenerRepositoryDefault
 import com.br.urlshortener.ui.event.UrlShortenerUIEvent

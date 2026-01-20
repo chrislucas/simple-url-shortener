@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,9 +18,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.br.urlshortener.R
-
 import kotlinx.coroutines.delay
-
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -34,7 +31,8 @@ fun SplashScreen(onClose: () -> Unit = {}) {
                 durationMillis = 1000,
                 easing = {
                     OvershootInterpolator(2f).getInterpolation(it)
-                })
+                }
+            )
         )
         delay(3000L)
         onClose()

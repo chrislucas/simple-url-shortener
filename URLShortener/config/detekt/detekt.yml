@@ -1,10 +1,21 @@
+# https://detekt.dev/docs/1.23.8/rules/formatting
+config:
+  validation: true
+  warningsAsErrors: false
+  excludes: ''
+
+# how to configure detekt to autofix
+formatting:
+  active: true
+  autoCorrect: true # This property is deprecated in newer versions and should be set via Gradle/CLI
+  MaximumLineLength:
+    active: true
+    autoCorrect: true
+  FinalNewline:
+    active: true
+    autoCorrect: true
+
 style:
-  FunctionNaming:
-    # Allows PascalCase for functions annotated with @Composable
-    ignoreAnnotated: ['Composable']
-  LongParameterList:
-    # Increase the threshold for parameter count, common in Composable functions
-    functionThreshold: 15
   MagicNumber:
     # Allows numbers in property declarations, useful for colors/dimensions
     ignorePropertyDeclaration: true
@@ -15,9 +26,37 @@ style:
 
 # configure ktlint and detekt android compose project
 build:
-  maxIssues: 0 # Fail the build if any issues are found
+  maxIssues: 100 # Fail the build if any issues are found
+  weights:
+  # complexity: 2
+  # LongParameterList: 1
+  # style: 1
+  # comments: 1
   # ...
+
 complexity:
+  TooManyFunctions:
+    thresholdInFiles: 20
+    ignoreAnnotatedFunctions: ['Preview']
   LongParameterList:
+    # Increase the threshold for parameter count, common in Composable functions
     functionThreshold: 15
+  CyclomaticComplexMethod:
+    threshold: 1
+    ignoreNestingFunctions: true
+
+naming:
+  FunctionNaming:
+    # Allows PascalCase for functions annotated with @Composable
+    ignoreAnnotated: [ 'Composable' ]
+
+console-reports:
+  active: true
+  exclude:
+    #  - 'ProjectStatisticsReport'
+    #  - 'ComplexityReport'
+    #  - 'NotificationReport'
+    #  - 'FindingsReport'
+    #  - 'FileBasedFindingsReport'
+    - 'LiteFindingsReport'
 

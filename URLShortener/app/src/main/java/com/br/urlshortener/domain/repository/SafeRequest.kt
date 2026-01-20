@@ -34,7 +34,6 @@ object SafeRequest {
     }
 }
 
-
 data class OperationResult<out T, out E>(
     val status: OperationStatus,
     val data: T? = null,
