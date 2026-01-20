@@ -4,8 +4,9 @@ package com.br.urlshortener.domain.model
 value class UrlShortener private constructor(val tinyUrl: String) {
     companion object {
         fun create(url: String): UrlShortener {
-            return if (isValidUrl(url)) {
-                UrlShortener(tinyUrl = url)
+            val tinyUrl = tinyUrl(url)
+            return if (isValidUrl(url) && isValidUrl(tinyUrl)) {
+                UrlShortener(tinyUrl = tinyUrl)
             } else {
                 throw IllegalArgumentException("Invalid URL format")
             }
@@ -15,6 +16,10 @@ value class UrlShortener private constructor(val tinyUrl: String) {
             val urlRegex =
                 "^(https?|ftp)://[\\w-]+(\\.[\\w-]+)+([\\w.,@?^=%&:/~+#-]*[\\w@?^=%&/~+#-])?$"
             return Regex(urlRegex).matches(url)
+        }
+
+        private fun tinyUrl(url: String): String {
+            return ""
         }
     }
 }

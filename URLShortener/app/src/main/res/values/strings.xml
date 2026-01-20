@@ -3,4 +3,7 @@
   <string name="title_activity_original_url">OriginalUrlActivity</string>
   <string name="enter_valid_url">Enter With a valid URL</string>
   <string name="send_shorten_url">enviar</string>
+  <string name="back_button">voltar</string>
+  <string name="list_shortener_url">urls encurtada</string>
+  <string name="shortener_url_detail">detalhe url encurtada</string>
 </resources>

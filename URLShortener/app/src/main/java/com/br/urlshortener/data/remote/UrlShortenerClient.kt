@@ -1,7 +1,7 @@
 package com.br.urlshortener.data.remote
 
 import com.br.urlshortener.data.remote.model.UrlShortenerDTO
-import com.br.urlshortener.data.remote.model.UrlDTO
+import com.br.urlshortener.data.remote.model.UrlResultDTO
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -10,10 +10,10 @@ import retrofit2.http.Path
 
 interface UrlShortenerClient {
 
-    @POST("api/alias")
-    suspend fun postUrl(@Body urlShortenerDTO: UrlShortenerDTO): Response<UrlDTO>
+    @POST("/api/alias")
+    suspend fun postUrl(@Body urlShortenerDTO: UrlShortenerDTO): Response<UrlResultDTO>
 
-    @GET("api/alias/:id")
+    @GET("/api/alias/:id")
     suspend fun getUrlShortener(@Path("id") id: String): Response<UrlShortenerDTO>
 
 }
