@@ -1,0 +1,23 @@
+style:
+  FunctionNaming:
+    # Allows PascalCase for functions annotated with @Composable
+    ignoreAnnotated: ['Composable']
+  LongParameterList:
+    # Increase the threshold for parameter count, common in Composable functions
+    functionThreshold: 15
+  MagicNumber:
+    # Allows numbers in property declarations, useful for colors/dimensions
+    ignorePropertyDeclaration: true
+    active: false # Disable a specific rule
+  UnusedPrivateMember:
+    # Ignores unused private members annotated with @Preview
+    ignoreAnnotated: ['Preview']
+
+# configure ktlint and detekt android compose project
+build:
+  maxIssues: 0 # Fail the build if any issues are found
+  # ...
+complexity:
+  LongParameterList:
+    functionThreshold: 15
+
