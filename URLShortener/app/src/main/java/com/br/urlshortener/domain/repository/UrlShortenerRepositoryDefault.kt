@@ -11,6 +11,7 @@ class UrlShortenerRepositoryDefault(private val client: UrlShortenerClient) : Ur
     override suspend fun postUrl(urlShortener: UrlShortener): UrlResult? {
         val response = client.postUrl(UrlShortenerDTO(urlShortener.tinyUrl))
         return if (response.isSuccessful) {
+            response.body()
             // Handle successful response if needed
             UrlResult(
                 alias = "79673226",

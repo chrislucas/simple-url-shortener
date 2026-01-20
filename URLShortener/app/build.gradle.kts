@@ -44,14 +44,25 @@ android {
         }
     }
 
+    /*
+        Java versions in Android builds
+        https://developer.android.com/build/jdks
+     */
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
+
 
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -102,6 +113,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter)
     testImplementation("io.mockk:mockk:1.14.7")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation("androidx.navigation:navigation-testing:2.9.6")
     androidTestImplementation(libs.androidx.junit)
