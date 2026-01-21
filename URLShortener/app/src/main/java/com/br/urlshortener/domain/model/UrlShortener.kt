@@ -1,5 +1,8 @@
 package com.br.urlshortener.domain.model
 
+import java.net.URI
+import java.security.MessageDigest
+
 @JvmInline
 value class UrlShortener private constructor(val url: String) {
     companion object {
@@ -21,7 +24,16 @@ value class UrlShortener private constructor(val url: String) {
         }
 
         private fun shortenerUrl(url: String): String {
-            return url
+            val scheme = runCatching { URI(url).scheme }
+                .getOrNull()
+                ?.lowercase()
+                ?: "https"
+            val digest = MessageDigest.getInstance("SHA-256")
+            val hashBytes = digest.digest(url.toByteArray(Charsets.UTF_8))
+            val hashHex = hashBytes.joinToString("") { "%02x".format(it) }
+            val domain = hashHex.substring(0, 8)
+            val path = hashHex.substring(8, 16)
+            return "$scheme://$domain.com/$path"
         }
     }
 }
