@@ -84,7 +84,9 @@ internal fun UrlShortenerApp(
 
             composable(route = NavRoute.UrlDetailScreenRoute.name) {
                 viewModel.urlShortener.value?.let {
-                    UrlDetailScreen(it.url)
+                    UrlDetailScreen(it.url) {
+                        backToShortenerUrlScreen(navController)
+                    }
                 }
             }
         }
@@ -123,9 +125,7 @@ private fun UrlShortenerAppBar(
 }
 
 
-private fun backToInit(
-    navController: NavHostController
-) {
+private fun backToShortenerUrlScreen(navController: NavHostController) {
     navController.popBackStack( NavRoute.ShortenerUrlScreenRoute.name, inclusive = false)
 }
 

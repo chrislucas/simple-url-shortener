@@ -39,7 +39,7 @@ fun SplashScreen(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
     }
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
     ) {
         Image(
             imageVector = Icons.Filled.Home,
