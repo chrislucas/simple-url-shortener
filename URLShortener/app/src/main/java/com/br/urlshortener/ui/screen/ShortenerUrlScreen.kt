@@ -11,6 +11,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.br.urlshortener.domain.model.UrlShortener
 import com.br.urlshortener.ui.component.ErrorOverlayComponent
 import com.br.urlshortener.ui.component.LoadingOverlayComponent
 import com.br.urlshortener.ui.component.UrlShortenerFormComponent
@@ -36,11 +38,28 @@ internal fun UrlShortenerScreen(
             ErrorOverlayComponent()
         }
 
+        is UrlShortenerUIState.Success<*> -> {
+            val s = (uiState.value as UrlShortenerUIState.Success<*>).data
+            if (s is UrlShortener) {
+                UrlDetailScreen(s.url)
+            } else {
+                UrlShortenerForm(modifier, urlShortenerViewModel)
+            }
+        }
+
         else -> {
-            // Idle or Success state, no special UI needed - DO NOTHING
+            UrlShortenerForm(modifier, urlShortenerViewModel)
         }
     }
+}
 
+@Composable
+private fun UrlShortenerForm(
+    modifier: Modifier = Modifier,
+    urlShortenerViewModel: UrlShortenerViewModel = viewModel(factory = UrlShortenerViewModel.FACTORY),
+    onClickItem: () -> Unit = {}
+
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -48,7 +67,6 @@ internal fun UrlShortenerScreen(
             .systemBarsPadding()
             .padding(2.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
     ) {
         UrlShortenerFormComponent(modifier, urlShortenerViewModel)
         UrlShortenerListComponent(modifier, urlShortenerViewModel, onClickItem)

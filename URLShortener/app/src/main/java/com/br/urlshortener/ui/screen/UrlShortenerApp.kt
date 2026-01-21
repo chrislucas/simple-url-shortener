@@ -64,7 +64,6 @@ internal fun UrlShortenerApp(
             startDestination = NavRoute.SplashScreenRoute.name,
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
         ) {
             composable(route = NavRoute.SplashScreenRoute.name) {
