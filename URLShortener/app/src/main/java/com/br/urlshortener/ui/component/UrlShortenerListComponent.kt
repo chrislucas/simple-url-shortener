@@ -29,9 +29,7 @@ internal fun UrlShortenerListComponent(
     urlShortenerViewModel: UrlShortenerViewModel,
     onClickItem: () -> Unit = {}
 ) {
-/*
     val uiState by urlShortenerViewModel.uiState.collectAsState()
-
     when (uiState) {
         is UrlShortenerUIState.Success<*> -> {
             val urlShortener = (uiState as UrlShortenerUIState.Success<*>).data
@@ -48,9 +46,6 @@ internal fun UrlShortenerListComponent(
             // DO NOTHINH
         }
     }
-
- */
-
     val urls by urlShortenerViewModel.urls.collectAsState()
     UrlShortenerList(modifier, urls) { id ->
         urlShortenerViewModel.interpreter(UrlShortenerUIEvent.GetShortUrlEvent(id))

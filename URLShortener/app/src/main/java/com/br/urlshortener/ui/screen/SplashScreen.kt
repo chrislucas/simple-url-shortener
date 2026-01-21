@@ -34,7 +34,7 @@ fun SplashScreen(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
                 }
             )
         )
-        delay(3000L)
+        delay(1500L)
         onClose()
     }
     Box(
