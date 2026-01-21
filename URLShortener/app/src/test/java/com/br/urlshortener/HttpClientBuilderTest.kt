@@ -6,10 +6,10 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Converter
 import retrofit2.Retrofit
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.*
+import org.junit.After
+import org.junit.Assert.*
+import org.junit.Before
+import org.junit.Test
 
 class HttpClientBuilderTest {
 
@@ -17,12 +17,12 @@ class HttpClientBuilderTest {
 
     private var originalDebug: Boolean = BuildConfig.DEBUG
 
-    @BeforeEach
+    @Before
     fun setUp() {
         unmockkAll()
     }
 
-    @AfterEach
+    @After
     fun tearDown() {
         unmockkAll()
         restoreBuildConfigDebug()

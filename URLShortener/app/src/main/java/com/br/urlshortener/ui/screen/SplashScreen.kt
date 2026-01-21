@@ -1,4 +1,4 @@
-package com.br.urlshortener.ui.component
+package com.br.urlshortener.ui.screen
 
 import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.core.Animatable

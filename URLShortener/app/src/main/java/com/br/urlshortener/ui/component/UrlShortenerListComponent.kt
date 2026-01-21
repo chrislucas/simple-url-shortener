@@ -1,4 +1,4 @@
-package com.br.urlshortener
+package com.br.urlshortener.ui.component
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

@@ -17,6 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.br.urlshortener.ui.component.LoadingOverlayComponent
+import com.br.urlshortener.ui.component.UrlShortenerFormComponent
+import com.br.urlshortener.ui.component.UrlShortenerListComponent
 import com.br.urlshortener.ui.state.UrlShortenerUIState
 import com.br.urlshortener.ui.theme.URLShortenerTheme
 import com.br.urlshortener.viewmodel.UrlShortenerViewModel
@@ -45,31 +48,23 @@ internal fun UrlShortenerScreen(
     )
 ) {
     val uiState = urlShortenerViewModel.uiState.collectAsState()
-
     when (uiState.value) {
         is UrlShortenerUIState.Loading -> {
             // You can add a loading indicator here
+            LoadingOverlayComponent()
         }
-
-        is UrlShortenerUIState.Error -> {
-            // You can show an error message here
-        }
-
         else -> {
-            // Idle or Success state, no special UI needed
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .navigationBarsPadding()
+                    .systemBarsPadding()
+                    .padding(2.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                UrlShortenerFormComponent(modifier, urlShortenerViewModel)
+                UrlShortenerListComponent(modifier, urlShortenerViewModel)
+            }
         }
-    }
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .navigationBarsPadding()
-            .systemBarsPadding()
-            .padding(2.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        UrlShortenerFormComponent(modifier, urlShortenerViewModel)
-        UrlShortenerListComponent(modifier, urlShortenerViewModel)
     }
 }

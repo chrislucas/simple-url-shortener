@@ -1,4 +1,4 @@
-package com.br.urlshortener
+package com.br.urlshortener.ui.screen
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
@@ -11,9 +11,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.br.urlshortener.R
+import com.br.urlshortener.viewmodel.UrlShortenerViewModel
 
 enum class UrlShortenerScreen(@field:StringRes val title: Int) {
     SplashScreen(title = R.string.app_name),
@@ -22,12 +29,24 @@ enum class UrlShortenerScreen(@field:StringRes val title: Int) {
 }
 
 @Composable
-internal fun UrlShortenerApp() {
+internal fun UrlShortenerApp(
+    modifier: Modifier = Modifier,
+    viewModel: UrlShortenerViewModel = viewModel(factory = UrlShortenerViewModel.FACTORY),
+    navController: NavHostController = rememberNavController()
+) {
+
+    val backStackEntry by navController.currentBackStackEntryAsState()
+
+    val currentScreen = UrlShortenerScreen.valueOf(
+        backStackEntry?.destination?.route ?: UrlShortenerScreen.SplashScreen.name
+    )
+
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UrlShortenerAppBar(
+private fun UrlShortenerAppBar(
     currentScreen: UrlShortenerScreen,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,

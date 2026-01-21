@@ -19,7 +19,7 @@ value class UrlShortener private constructor(val tinyUrl: String) {
         }
 
         private fun tinyUrl(url: String): String {
-            return ""
+            return url
         }
     }
 }

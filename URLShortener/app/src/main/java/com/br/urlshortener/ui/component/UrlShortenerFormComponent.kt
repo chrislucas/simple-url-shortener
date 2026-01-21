@@ -1,4 +1,4 @@
-package com.br.urlshortener
+package com.br.urlshortener.ui.component
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.br.urlshortener.R
 import com.br.urlshortener.ui.event.UrlShortenerUIEvent
 import com.br.urlshortener.ui.theme.URLShortenerTheme
 import com.br.urlshortener.viewmodel.UrlShortenerViewModel

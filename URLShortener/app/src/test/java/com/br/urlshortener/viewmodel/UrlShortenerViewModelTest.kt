@@ -36,7 +36,7 @@ class UrlShortenerViewModelTest {
     fun setUp() {
         MockKAnnotations.init(this)
         Dispatchers.setMain(testDispatcher)
-        viewModel = UrlShortenerViewModel(repository)
+        viewModel = UrlShortenerViewModel(repository, testDispatcher)
     }
 
     @After
@@ -96,9 +96,9 @@ class UrlShortenerViewModelTest {
         coEvery { repository.postUrl(any<UrlShortener>()) } returns expectedResult
 
         viewModel.postAction(UrlShortenerUIEvent.PostShortUrlEvent)
-
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Loading)
         advanceUntilIdle()
+
 
         coVerify { repository.postUrl(urlShortener) }
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Success)
@@ -178,7 +178,7 @@ class UrlShortenerViewModelTest {
 
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Error)
         assertEquals(
-            exception.message,
+            "Network error",
             (viewModel.uiState.value as UrlShortenerUIState.Error).message
         )
     }
@@ -193,9 +193,13 @@ class UrlShortenerViewModelTest {
         coEvery { repository.getUrlShortener(id) } returns expectedResult
 
         viewModel.postAction(UrlShortenerUIEvent.GetShortUrlEvent(id))
+        assertTrue(viewModel.uiState.value is UrlShortenerUIState.Loading)
         advanceUntilIdle()
 
         coVerify { repository.getUrlShortener(id) }
+        assertTrue(viewModel.uiState.value is UrlShortenerUIState.Success)
+        assertEquals(expectedResult, (viewModel.uiState.value as UrlShortenerUIState.Success).urlResult)
+        assertEquals(listOf(expectedResult), viewModel.urls.value)
     }
 
     @Test
@@ -219,8 +223,8 @@ class UrlShortenerViewModelTest {
         advanceUntilIdle()
 
         assertEquals(2, viewModel.urls.value.size)
-        assertEquals(result2, viewModel.urls.value[0])
-        assertEquals(result1, viewModel.urls.value[1])
+        assertEquals(result1, viewModel.urls.value[0])
+        assertEquals(result2, viewModel.urls.value[1])
     }
 
     @Test
@@ -254,8 +258,14 @@ class UrlShortenerViewModelTest {
         coEvery { repository.getUrlShortener(id) } throws exception
 
         viewModel.postAction(UrlShortenerUIEvent.GetShortUrlEvent(id))
+        assertTrue(viewModel.uiState.value is UrlShortenerUIState.Loading)
         advanceUntilIdle()
 
         coVerify { repository.getUrlShortener(id) }
+        assertTrue(viewModel.uiState.value is UrlShortenerUIState.Error)
+        assertEquals(
+            "Not found",
+            (viewModel.uiState.value as UrlShortenerUIState.Error).message
+        )
     }
 }

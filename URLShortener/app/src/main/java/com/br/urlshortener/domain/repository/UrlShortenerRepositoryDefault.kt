@@ -11,15 +11,17 @@ class UrlShortenerRepositoryDefault(private val client: UrlShortenerClient) : Ur
     override suspend fun postUrl(urlShortener: UrlShortener): UrlResult? {
         val response = client.postUrl(UrlShortenerDTO(urlShortener.tinyUrl))
         return if (response.isSuccessful) {
-            response.body()
+            val result = response.body()
             // Handle successful response if needed
-            UrlResult(
-                alias = "79673226",
-                link = Link(
-                    self = "https://api.short.io/links/79673226",
-                    short = "https://short.io/79673226"
+            result?.let {
+                UrlResult(
+                    alias = it.alias,
+                    link = Link(
+                        self = it.link.originalUrl,
+                        short = it.link.tinyUrl
+                    )
                 )
-            )
+            }
         } else {
             // Handle error response if needed
             null
@@ -27,12 +29,14 @@ class UrlShortenerRepositoryDefault(private val client: UrlShortenerClient) : Ur
     }
 
     override suspend fun getUrlShortener(id: String): UrlResult {
-        return UrlResult(
-            alias = "79673226",
-            link = Link(
-                self = "https://api.short.io/links/79673226",
-                short = "https://short.io/79673226"
-            )
-        )
+        val response = client.getUrlShortener(id)
+        if(response.isSuccessful) {
+            val result = response.body()
+            // Handle successful response if needed
+            result?.let {
+            }
+        } else {
+            null
+        }
     }
 }

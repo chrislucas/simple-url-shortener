@@ -7,5 +7,5 @@ interface UrlShortenerRepository {
 
     suspend fun postUrl(urlShortener: UrlShortener): UrlResult?
 
-    suspend fun getUrlShortener(id: String): UrlResult
+    suspend fun getUrlShortener(id: String): UrlResult?
 }

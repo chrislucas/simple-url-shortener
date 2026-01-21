@@ -103,6 +103,7 @@ dependencies {
     // Splash Screen API
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.androidx.compose.runtime)
+    testImplementation(libs.junit.junit)
 
     // https://github.com/mrmans0n/compose-rules
     // https://mrmans0n.github.io/compose-rules/ktlint/
