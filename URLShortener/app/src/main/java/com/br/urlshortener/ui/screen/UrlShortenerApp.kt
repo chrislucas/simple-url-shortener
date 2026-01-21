@@ -32,6 +32,7 @@ import com.br.urlshortener.R
 import com.br.urlshortener.domain.model.UrlShortener
 import com.br.urlshortener.ui.state.UrlShortenerUIState
 import com.br.urlshortener.viewmodel.UrlShortenerViewModel
+import androidx.compose.ui.tooling.preview.Preview
 
 enum class NavRoute(@field:StringRes val title: Int) {
     SplashScreenRoute(title = R.string.app_name),
@@ -128,3 +129,12 @@ private fun backToShortenerUrlScreen(navController: NavHostController) {
     navController.popBackStack( NavRoute.ShortenerUrlScreenRoute.name, inclusive = false)
 }
 
+@Preview
+@Composable
+private fun UrlShortenerAppBarPreview() {
+    UrlShortenerAppBar(
+        currentScreen = NavRoute.ShortenerUrlScreenRoute,
+        canNavigateBack = true,
+        navigateUp = {}
+    )
+}

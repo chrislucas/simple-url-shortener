@@ -33,7 +33,7 @@ internal fun UrlShortenerListComponent(
     when (uiState) {
         is UrlShortenerUIState.Success<*> -> {
             val urlShortener = (uiState as UrlShortenerUIState.Success<*>).data
-            if(urlShortener is UrlShortener) {
+            if (urlShortener is UrlShortener) {
                 onClickItem()
             }
         }
@@ -58,21 +58,21 @@ internal fun UrlShortenerList(
     urls: List<UrlResult>,
     onClickListener: (String) -> Unit
 ) {
-    LazyColumn(
-        modifier = modifier.fillMaxWidth()
-    ) {
+    LazyColumn(modifier = Modifier.fillMaxWidth()) {
         items(urls.size) { index ->
             val url = urls[index]
             Card(
-                modifier = modifier.fillParentMaxWidth().padding(4.dp),
-                onClick = {
-                    onClickListener(url.alias)
-                },
+                modifier = modifier
+                    .fillParentMaxWidth()
+                    .padding(4.dp),
+                onClick = { onClickListener(url.alias) },
                 shape = RectangleShape
             ) {
                 Text(
                     text = url.link.short,
-                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
                 )
             }
         }
