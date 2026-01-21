@@ -33,7 +33,6 @@ internal fun UrlShortenerScreen(
     val uiState by urlShortenerViewModel.uiState.collectAsState()
     when (uiState) {
         is UrlShortenerUIState.Loading -> {
-            // You can add a loading indicator here
             LoadingOverlayComponent()
             UrlShortenerForm(modifier, urlShortenerViewModel, onClickItem)
         }
