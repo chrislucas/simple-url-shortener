@@ -11,7 +11,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.br.urlshortener.ui.component.ErrorOverlayComponent
 import com.br.urlshortener.ui.component.LoadingOverlayComponent
 import com.br.urlshortener.ui.component.UrlShortenerFormComponent
@@ -22,7 +21,8 @@ import com.br.urlshortener.viewmodel.UrlShortenerViewModel
 @Composable
 internal fun UrlShortenerScreen(
     modifier: Modifier = Modifier,
-    urlShortenerViewModel: UrlShortenerViewModel
+    urlShortenerViewModel: UrlShortenerViewModel,
+    onClickItem: () -> Unit = {}
 ) {
     val uiState = urlShortenerViewModel.uiState.collectAsState()
     when (uiState.value) {
@@ -51,6 +51,6 @@ internal fun UrlShortenerScreen(
         verticalArrangement = Arrangement.Center
     ) {
         UrlShortenerFormComponent(modifier, urlShortenerViewModel)
-        UrlShortenerListComponent(modifier, urlShortenerViewModel)
+        UrlShortenerListComponent(modifier, urlShortenerViewModel, onClickItem)
     }
 }

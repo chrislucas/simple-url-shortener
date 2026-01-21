@@ -22,7 +22,7 @@ import kotlinx.coroutines.delay
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun SplashScreen(onClose: () -> Unit = {}) {
+fun SplashScreen(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
     val scale = remember { Animatable(0f) }
     LaunchedEffect(key1 = true) {
         scale.animateTo(
@@ -37,7 +37,10 @@ fun SplashScreen(onClose: () -> Unit = {}) {
         delay(3000L)
         onClose()
     }
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize()
+    ) {
         Image(
             imageVector = Icons.Filled.Home,
             contentDescription = "Logo",

@@ -1,16 +1,18 @@
 package com.br.urlshortener.domain.model
 
 @JvmInline
-value class UrlShortener private constructor(val tinyUrl: String) {
+value class UrlShortener private constructor(val url: String) {
     companion object {
         fun create(url: String): UrlShortener {
-            val tinyUrl = tinyUrl(url)
+            val tinyUrl = shortenerUrl(url)
             return if (isValidUrl(url) && isValidUrl(tinyUrl)) {
-                UrlShortener(tinyUrl = tinyUrl)
+                UrlShortener(url = tinyUrl)
             } else {
                 throw IllegalArgumentException("Invalid URL format")
             }
         }
+
+        fun createFromResult(url: String): UrlShortener = UrlShortener(url)
 
         private fun isValidUrl(url: String): Boolean {
             val urlRegex =
@@ -18,7 +20,7 @@ value class UrlShortener private constructor(val tinyUrl: String) {
             return Regex(urlRegex).matches(url)
         }
 
-        private fun tinyUrl(url: String): String {
+        private fun shortenerUrl(url: String): String {
             return url
         }
     }

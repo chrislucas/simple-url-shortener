@@ -95,14 +95,14 @@ class UrlShortenerViewModelTest {
         viewModel.onChangeTextFieldContent(url)
         coEvery { repository.postUrl(any<UrlShortener>()) } returns expectedResult
 
-        viewModel.postAction(UrlShortenerUIEvent.PostShortUrlEvent)
+        viewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Loading)
         advanceUntilIdle()
 
 
         coVerify { repository.postUrl(urlShortener) }
-        assertTrue(viewModel.uiState.value is UrlShortenerUIState.Success)
-        assertEquals(expectedResult, (viewModel.uiState.value as UrlShortenerUIState.Success).urlResult)
+        assertTrue(viewModel.uiState.value is UrlShortenerUIState.Success<*>)
+        assertEquals(expectedResult, (viewModel.uiState.value as UrlShortenerUIState.Success<*>).data)
         assertEquals(1, viewModel.urls.value.size)
         assertEquals(expectedResult, viewModel.urls.value.first())
     }
@@ -112,7 +112,7 @@ class UrlShortenerViewModelTest {
         val invalidUrl = "not-a-valid-url"
         viewModel.onChangeTextFieldContent(invalidUrl)
 
-        viewModel.postAction(UrlShortenerUIEvent.PostShortUrlEvent)
+        viewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
 
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Loading)
         advanceUntilIdle()
@@ -129,7 +129,7 @@ class UrlShortenerViewModelTest {
     fun `postAction PostShortUrlEvent with empty URL`() = runTest {
         viewModel.onChangeTextFieldContent("")
 
-        viewModel.postAction(UrlShortenerUIEvent.PostShortUrlEvent)
+        viewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
 
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Loading)
         advanceUntilIdle()
@@ -150,7 +150,7 @@ class UrlShortenerViewModelTest {
         viewModel.onChangeTextFieldContent(url)
         coEvery { repository.postUrl(any<UrlShortener>()) } returns null
 
-        viewModel.postAction(UrlShortenerUIEvent.PostShortUrlEvent)
+        viewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
 
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Loading)
         advanceUntilIdle()
@@ -171,7 +171,7 @@ class UrlShortenerViewModelTest {
         viewModel.onChangeTextFieldContent(url)
         coEvery { repository.postUrl(any<UrlShortener>()) } throws exception
 
-        viewModel.postAction(UrlShortenerUIEvent.PostShortUrlEvent)
+        viewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
 
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Loading)
         advanceUntilIdle()
@@ -186,20 +186,18 @@ class UrlShortenerViewModelTest {
     @Test
     fun `postAction GetShortUrlEvent triggers repository call`() = runTest {
         val id = "someId"
-        val expectedResult = UrlResult(
-            alias = id,
-            link = Link(self = "https://original.url", short = "https://sh.rt/someId")
+        val expectedResult = UrlShortener.createFromResult(
+            url = "https://sh.rt/$id"
         )
         coEvery { repository.getUrlShortener(id) } returns expectedResult
 
-        viewModel.postAction(UrlShortenerUIEvent.GetShortUrlEvent(id))
+        viewModel.interpreter(UrlShortenerUIEvent.GetShortUrlEvent(id))
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Loading)
         advanceUntilIdle()
 
         coVerify { repository.getUrlShortener(id) }
-        assertTrue(viewModel.uiState.value is UrlShortenerUIState.Success)
-        assertEquals(expectedResult, (viewModel.uiState.value as UrlShortenerUIState.Success).urlResult)
-        assertEquals(listOf(expectedResult), viewModel.urls.value)
+        assertTrue(viewModel.uiState.value is UrlShortenerUIState.Success<*>)
+        assertEquals(expectedResult, (viewModel.uiState.value as UrlShortenerUIState.Success<*>).data)
     }
 
     @Test
@@ -212,14 +210,14 @@ class UrlShortenerViewModelTest {
         // First call
         viewModel.onChangeTextFieldContent(url1)
         coEvery { repository.postUrl(UrlShortener.create(url1)) } returns result1
-        viewModel.postAction(UrlShortenerUIEvent.PostShortUrlEvent)
+        viewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
         advanceUntilIdle()
 
 
         // Second call
         viewModel.onChangeTextFieldContent(url2)
         coEvery { repository.postUrl(UrlShortener.create(url2)) } returns result2
-        viewModel.postAction(UrlShortenerUIEvent.PostShortUrlEvent)
+        viewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
         advanceUntilIdle()
 
         assertEquals(2, viewModel.urls.value.size)
@@ -238,10 +236,10 @@ class UrlShortenerViewModelTest {
         coEvery { repository.postUrl(UrlShortener.create(url2)) } returns result2
 
         viewModel.onChangeTextFieldContent(url1)
-        viewModel.postAction(UrlShortenerUIEvent.PostShortUrlEvent)
+        viewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
 
         viewModel.onChangeTextFieldContent(url2)
-        viewModel.postAction(UrlShortenerUIEvent.PostShortUrlEvent)
+        viewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
 
         advanceUntilIdle()
 
@@ -254,17 +252,17 @@ class UrlShortenerViewModelTest {
     @Test
     fun `postAction GetShortUrlEvent with empty ID`() = runTest {
         val id = ""
-        val exception = RuntimeException("Not found")
+        val exception = Exception("Not found")
         coEvery { repository.getUrlShortener(id) } throws exception
 
-        viewModel.postAction(UrlShortenerUIEvent.GetShortUrlEvent(id))
+        viewModel.interpreter(UrlShortenerUIEvent.GetShortUrlEvent(id))
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Loading)
         advanceUntilIdle()
 
         coVerify { repository.getUrlShortener(id) }
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Error)
         assertEquals(
-            "Not found",
+            "Failed to fetch shorten URL",
             (viewModel.uiState.value as UrlShortenerUIState.Error).message
         )
     }

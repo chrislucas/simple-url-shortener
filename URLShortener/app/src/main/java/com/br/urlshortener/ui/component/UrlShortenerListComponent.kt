@@ -9,26 +9,51 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.br.urlshortener.domain.model.Link
 import com.br.urlshortener.domain.model.UrlResult
+import com.br.urlshortener.domain.model.UrlShortener
 import com.br.urlshortener.ui.event.UrlShortenerUIEvent
+import com.br.urlshortener.ui.state.UrlShortenerUIState
 import com.br.urlshortener.ui.theme.URLShortenerTheme
 import com.br.urlshortener.viewmodel.UrlShortenerViewModel
 
 @Composable
 internal fun UrlShortenerListComponent(
     modifier: Modifier = Modifier,
-    urlShortenerViewModel: UrlShortenerViewModel
+    urlShortenerViewModel: UrlShortenerViewModel,
+    onClickItem: () -> Unit = {}
 ) {
+/*
+    val uiState by urlShortenerViewModel.uiState.collectAsState()
+
+    when (uiState) {
+        is UrlShortenerUIState.Success<*> -> {
+            val urlShortener = (uiState as UrlShortenerUIState.Success<*>).data
+            if(urlShortener is UrlShortener) {
+                onClickItem()
+            }
+        }
+
+        is UrlShortenerUIState.Error -> {
+            //
+        }
+
+        else -> {
+            // DO NOTHINH
+        }
+    }
+
+ */
+
     val urls by urlShortenerViewModel.urls.collectAsState()
     UrlShortenerList(modifier, urls) { id ->
-        urlShortenerViewModel.postAction(
-            UrlShortenerUIEvent.GetShortUrlEvent(id)
-        )
+        urlShortenerViewModel.interpreter(UrlShortenerUIEvent.GetShortUrlEvent(id))
     }
 }
 
@@ -44,16 +69,15 @@ internal fun UrlShortenerList(
         items(urls.size) { index ->
             val url = urls[index]
             Card(
-                modifier = modifier
-                    .fillParentMaxWidth()
-                    .padding(8.dp),
+                modifier = modifier.fillParentMaxWidth().padding(4.dp),
                 onClick = {
                     onClickListener(url.alias)
-                }
+                },
+                shape = RectangleShape
             ) {
                 Text(
                     text = url.link.short,
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
                 )
             }
         }
@@ -62,28 +86,25 @@ internal fun UrlShortenerList(
 
 class UrlShortenerListParameterProvider : PreviewParameterProvider<List<UrlResult>> {
     override val values: Sequence<List<UrlResult>> = sequenceOf(
-        listOf(
-            UrlResult(
-                alias = "1",
-                link = Link(
-                    self = "https://www.google.com",
-                    short = "https://url-shortener/1"
+        buildList {
+            repeat(10) {
+                add(
+                    UrlResult(
+                        alias = "$it",
+                        link = Link(
+                            self = "https://www.google.com",
+                            short = "https://url-shortener/1"
+                        )
+                    )
                 )
-            ),
-            UrlResult(
-                alias = "2",
-                link = Link(
-                    self = "https://www.facebook.com",
-                    short = "https://url-shortener/2"
-                )
-            )
-        )
+            }
+        }
     )
 }
 
 @Preview(showBackground = true)
 @Composable
-fun UrlShortenerListPreview(
+private fun UrlShortenerListPreview(
     @PreviewParameter(UrlShortenerListParameterProvider::class) urls: List<UrlResult>
 ) {
     URLShortenerTheme {

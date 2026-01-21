@@ -9,7 +9,7 @@ import com.br.urlshortener.domain.model.UrlShortener
 class UrlShortenerRepositoryDefault(private val client: UrlShortenerClient) : UrlShortenerRepository {
 
     override suspend fun postUrl(urlShortener: UrlShortener): UrlResult? {
-        val response = client.postUrl(UrlShortenerDTO(urlShortener.tinyUrl))
+        val response = client.postUrl(UrlShortenerDTO(urlShortener.url))
         return if (response.isSuccessful) {
             val result = response.body()
             // Handle successful response if needed
@@ -28,12 +28,15 @@ class UrlShortenerRepositoryDefault(private val client: UrlShortenerClient) : Ur
         }
     }
 
-    override suspend fun getUrlShortener(id: String): UrlResult {
+    override suspend fun getUrlShortener(id: String): UrlShortener? {
         val response = client.getUrlShortener(id)
-        if(response.isSuccessful) {
+        return if(response.isSuccessful) {
             val result = response.body()
             // Handle successful response if needed
-            result?.let {
+            result?.let { urlShortener ->
+                UrlShortener.createFromResult(
+                   urlShortener.tinyUrl
+                )
             }
         } else {
             null

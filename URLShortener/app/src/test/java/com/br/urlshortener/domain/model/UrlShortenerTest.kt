@@ -12,7 +12,7 @@ class UrlShortenerTest {
 
         val result = UrlShortener.create(url)
 
-        assertEquals(url, result.tinyUrl)
+        assertEquals(url, result.url)
     }
 
     @Test
@@ -21,7 +21,7 @@ class UrlShortenerTest {
 
         val result = UrlShortener.create(url)
 
-        assertEquals(url, result.tinyUrl)
+        assertEquals(url, result.url)
     }
 
     @Test
@@ -30,7 +30,7 @@ class UrlShortenerTest {
 
         val result = UrlShortener.create(url)
 
-        assertEquals(url, result.tinyUrl)
+        assertEquals(url, result.url)
     }
 
     @Test

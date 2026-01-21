@@ -13,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,7 +32,7 @@ internal fun UrlShortenerFormComponent(
         content = content,
         onContentChange = urlShortenerViewModel::onChangeTextFieldContent,
         onSendClick = {
-            urlShortenerViewModel.postAction(UrlShortenerUIEvent.PostShortUrlEvent)
+            urlShortenerViewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
         },
         modifier = modifier
     )
@@ -58,8 +59,9 @@ private fun UrlShortenerForm(
         )
 
         Button(
-            modifier = Modifier.weight(.4f),
-            onClick = onSendClick
+            modifier = Modifier.weight(.4f).padding(4.dp),
+            onClick = onSendClick,
+            shape = RectangleShape
         ) {
             Text(text = stringResource(id = R.string.send_shorten_url))
         }

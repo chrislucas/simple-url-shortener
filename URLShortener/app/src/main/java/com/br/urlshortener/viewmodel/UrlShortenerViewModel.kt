@@ -1,5 +1,7 @@
 package com.br.urlshortener.viewmodel
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -37,7 +39,11 @@ class UrlShortenerViewModel(
     )
     val uiState: StateFlow<UrlShortenerUIState> = mutableUiSate.asStateFlow()
 
-    fun postAction(action: UrlShortenerUIEvent) {
+    private val _urlShortener = mutableStateOf<UrlShortener?>(null)
+    val urlShortener: State<UrlShortener?> = _urlShortener
+
+
+    fun interpreter(action: UrlShortenerUIEvent) {
         mutableUiSate.update {
             UrlShortenerUIState.Loading
         }
@@ -65,15 +71,15 @@ class UrlShortenerViewModel(
 
             try {
                 val result = repository.postUrl(urlShortener)
-                if (result == null) {
+                result?.let { nonNullResult ->
+                    shortUrls.update { it + nonNullResult }
+                    mutableUiSate.update {
+                        UrlShortenerUIState.Success(nonNullResult)
+                    }
+                } ?: run {
                     mutableUiSate.update {
                         UrlShortenerUIState.Error("Failed to post shorten URL")
                     }
-                    return@launch
-                }
-                shortUrls.update { it + result }
-                mutableUiSate.update {
-                    UrlShortenerUIState.Success(result)
                 }
             } catch (exception: Exception) {
                 val message = exception.message ?: "Failed to post shorten URL"
@@ -87,9 +93,10 @@ class UrlShortenerViewModel(
     private fun getUrlShortener(id: String) {
         viewModelScope.launch(coroutineContext) {
             try {
-                val urlResult: UrlResult = repository.getUrlShortener(id)
+                val urlShortener: UrlShortener? = repository.getUrlShortener(id)
+                _urlShortener.value = urlShortener
                 mutableUiSate.update {
-                    UrlShortenerUIState.Success(urlResult)
+                    UrlShortenerUIState.Success(urlShortener)
                 }
             } catch (exception: Exception) {
                 val message = exception.message ?: "Failed to fetch shorten URL"

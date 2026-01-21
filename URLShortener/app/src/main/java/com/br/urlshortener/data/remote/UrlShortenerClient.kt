@@ -13,6 +13,6 @@ interface UrlShortenerClient {
     @POST("/api/alias")
     suspend fun postUrl(@Body urlShortenerDTO: UrlShortenerDTO): Response<UrlResultDTO>
 
-    @GET("/api/alias/:id")
+    @GET("/api/alias/{id}")
     suspend fun getUrlShortener(@Path("id") id: String): Response<UrlShortenerDTO>
 }
