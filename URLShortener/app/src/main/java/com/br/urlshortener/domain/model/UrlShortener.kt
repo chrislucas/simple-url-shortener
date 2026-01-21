@@ -6,7 +6,7 @@ import java.security.MessageDigest
 @JvmInline
 value class UrlShortener private constructor(val url: String) {
     companion object {
-        fun create(url: String): UrlShortener {
+        fun createToPostUrl(url: String): UrlShortener {
             val tinyUrl = shortenerUrl(url)
             return if (isValidUrl(url) && isValidUrl(tinyUrl)) {
                 UrlShortener(url = tinyUrl)
@@ -15,7 +15,7 @@ value class UrlShortener private constructor(val url: String) {
             }
         }
 
-        fun createFromResult(url: String): UrlShortener = UrlShortener(url)
+        fun createFromGetResult(url: String): UrlShortener = UrlShortener(url)
 
         private fun isValidUrl(url: String): Boolean {
             val urlRegex =

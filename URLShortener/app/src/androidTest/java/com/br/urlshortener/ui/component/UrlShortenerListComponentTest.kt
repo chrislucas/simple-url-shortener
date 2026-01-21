@@ -6,6 +6,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.br.urlshortener.domain.model.Link
 import com.br.urlshortener.domain.model.UrlResult
 import com.br.urlshortener.ui.event.UrlShortenerUIEvent
@@ -17,11 +18,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
-@Config(instrumentedPackages = ["androidx.loader.content"])
-@RunWith(RobolectricTestRunner::class)
+
+@RunWith(AndroidJUnit4::class)
 class UrlShortenerListComponentTest {
 
     @get:Rule

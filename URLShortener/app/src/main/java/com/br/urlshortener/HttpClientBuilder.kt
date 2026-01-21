@@ -11,10 +11,11 @@ object HttpClientBuilder {
     inline fun <reified T> createService(
         url: String,
         converterFactory: Converter.Factory = GsonConverterFactory.create(),
+        isDebug: Boolean = BuildConfig.DEBUG,
     ): T {
         val okHttpClient = OkHttpClient.Builder().apply {
             val logging = HttpLoggingInterceptor()
-            if (BuildConfig.DEBUG) {
+            if (isDebug) {
                 logging.setLevel(HttpLoggingInterceptor.Level.BODY)
                 addInterceptor(logging)
             }

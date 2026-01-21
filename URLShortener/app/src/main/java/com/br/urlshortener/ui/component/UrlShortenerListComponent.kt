@@ -10,7 +10,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -32,14 +31,10 @@ internal fun UrlShortenerListComponent(
     val uiState by urlShortenerViewModel.uiState.collectAsState()
     when (uiState) {
         is UrlShortenerUIState.Success<*> -> {
-            val urlShortener = (uiState as UrlShortenerUIState.Success<*>).data
-            if (urlShortener is UrlShortener) {
+            val url = (uiState as UrlShortenerUIState.Success<*>).data
+            if (url is UrlShortener) {
                 onClickItem()
             }
-        }
-
-        is UrlShortenerUIState.Error -> {
-            //
         }
 
         else -> {

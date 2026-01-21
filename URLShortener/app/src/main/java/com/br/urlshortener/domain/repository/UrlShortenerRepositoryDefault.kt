@@ -30,13 +30,10 @@ class UrlShortenerRepositoryDefault(private val client: UrlShortenerClient) : Ur
 
     override suspend fun getUrlShortener(id: String): UrlShortener? {
         val response = client.getUrlShortener(id)
-        return if(response.isSuccessful) {
+        return if (response.isSuccessful) {
             val result = response.body()
-            // Handle successful response if needed
             result?.let { urlShortener ->
-                UrlShortener.createFromResult(
-                   urlShortener.tinyUrl
-                )
+                UrlShortener.createFromGetResult(urlShortener.tinyUrl)
             }
         } else {
             null

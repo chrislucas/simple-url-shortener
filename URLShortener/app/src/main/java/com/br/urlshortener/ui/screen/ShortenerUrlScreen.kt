@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -12,11 +11,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.br.urlshortener.domain.model.UrlResult
 import com.br.urlshortener.domain.model.UrlShortener
 import com.br.urlshortener.domain.repository.UrlShortenerRepository
+import com.br.urlshortener.ui.component.ErrorOverlayComponent
+import com.br.urlshortener.ui.component.LoadingOverlayComponent
 import com.br.urlshortener.ui.component.UrlShortenerFormComponent
 import com.br.urlshortener.ui.component.UrlShortenerListComponent
 import com.br.urlshortener.ui.state.UrlShortenerUIState
@@ -27,26 +27,27 @@ import com.br.urlshortener.viewmodel.UrlShortenerViewModel
 internal fun UrlShortenerScreen(
     modifier: Modifier = Modifier,
     urlShortenerViewModel: UrlShortenerViewModel,
-    onClickItem: () -> Unit = {}
+    onClickItem: () -> Unit = {},
+    onBackPressed: () -> Unit = {},
 ) {
     val uiState by urlShortenerViewModel.uiState.collectAsState()
     when (uiState) {
         is UrlShortenerUIState.Loading -> {
             // You can add a loading indicator here
-            // LoadingOverlayComponent()
+            LoadingOverlayComponent()
             UrlShortenerForm(modifier, urlShortenerViewModel, onClickItem)
         }
 
         is UrlShortenerUIState.Error -> {
-            // You can show an error message here
-            // ErrorOverlayComponent()
+            val errorMessage = (uiState as UrlShortenerUIState.Error).message
+            ErrorOverlayComponent(errorMessage)
             UrlShortenerForm(modifier, urlShortenerViewModel, onClickItem)
         }
 
         is UrlShortenerUIState.Success<*> -> {
             val s = (uiState as UrlShortenerUIState.Success<*>).data
             if (s is UrlShortener && !s.url.isEmpty()) {
-                UrlDetailScreen(s.url)
+                UrlDetailScreen(s.url, onBackPressed)
             } else {
                 UrlShortenerForm(modifier, urlShortenerViewModel, onClickItem)
             }

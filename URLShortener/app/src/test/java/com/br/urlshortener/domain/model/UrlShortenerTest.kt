@@ -12,7 +12,7 @@ class UrlShortenerTest {
     fun `create with valid url returns shortened url with 8 char domain and same scheme`() {
         val url = "https://example.com/path?query=1#frag"
 
-        val result = UrlShortener.create(url)
+        val result = UrlShortener.createToPostUrl(url)
         val shortenedUrl = URL(result.url)
         val domainLabel = shortenedUrl.host.substringBefore(".")
 
@@ -25,7 +25,7 @@ class UrlShortenerTest {
     fun `create with ftp url keeps ftp scheme`() {
         val url = "ftp://example.com/resource"
 
-        val result = UrlShortener.create(url)
+        val result = UrlShortener.createToPostUrl(url)
         val shortenedUrl = URL(result.url)
 
         assertEquals("ftp", shortenedUrl.protocol)
@@ -35,8 +35,8 @@ class UrlShortenerTest {
     fun `create returns deterministic shortened url for same input`() {
         val url = "https://example.com/resource"
 
-        val first = UrlShortener.create(url).url
-        val second = UrlShortener.create(url).url
+        val first = UrlShortener.createToPostUrl(url).url
+        val second = UrlShortener.createToPostUrl(url).url
 
         assertEquals(first, second)
     }
@@ -44,7 +44,7 @@ class UrlShortenerTest {
     @Test
     fun `create throws when url is empty`() {
         val exception = assertThrows(IllegalArgumentException::class.java) {
-            UrlShortener.create("")
+            UrlShortener.createToPostUrl("")
         }
 
         assertEquals("Invalid URL format", exception.message)
@@ -53,7 +53,7 @@ class UrlShortenerTest {
     @Test
     fun `create throws when url has no scheme`() {
         val exception = assertThrows(IllegalArgumentException::class.java) {
-            UrlShortener.create("www.example.com")
+            UrlShortener.createToPostUrl("www.example.com")
         }
 
         assertEquals("Invalid URL format", exception.message)
@@ -62,7 +62,7 @@ class UrlShortenerTest {
     @Test
     fun `create throws when url contains spaces`() {
         val exception = assertThrows(IllegalArgumentException::class.java) {
-            UrlShortener.create("https://example.com/invalid path")
+            UrlShortener.createToPostUrl("https://example.com/invalid path")
         }
 
         assertEquals("Invalid URL format", exception.message)

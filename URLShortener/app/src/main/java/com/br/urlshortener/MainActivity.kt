@@ -46,7 +46,6 @@ internal fun UrlShortenerScreenApp(modifier: Modifier = Modifier) {
     UrlShortenerApp(modifier = modifier)
 }
 
-
 @Deprecated("Use UrlShortenerInitApp instead")
 @Composable
 internal fun UrlShortenerScreen(
@@ -81,7 +80,6 @@ internal fun UrlShortenerScreen(
         }
     }
 }
-
 
 @Composable
 private fun UrlShortenerForm(

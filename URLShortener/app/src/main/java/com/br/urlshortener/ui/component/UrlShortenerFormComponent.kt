@@ -2,8 +2,8 @@ package com.br.urlshortener.ui.component
 
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -57,8 +57,7 @@ private fun UrlShortenerForm(
         OutlinedTextField(
             modifier = Modifier
                 .weight(.6f)
-                .fillMaxHeight()
-                .padding(2.dp),
+                .fillMaxHeight(),
             value = content,
             onValueChange = onContentChange,
             label = { Text(text = stringResource(id = R.string.enter_valid_url)) },
@@ -68,7 +67,7 @@ private fun UrlShortenerForm(
             modifier = Modifier
                 .weight(.4f)
                 .fillMaxHeight()
-                .padding(2.dp),
+                .padding(4.dp),
             onClick = onSendClick,
             shape = RectangleShape
         ) {

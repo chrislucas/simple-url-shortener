@@ -86,7 +86,7 @@ class UrlShortenerViewModelTest {
     @Test
     fun `postAction PostShortUrlEvent with valid URL`() = runTest {
         val url = "https://google.com"
-        val urlShortener = UrlShortener.create(url)
+        val urlShortener = UrlShortener.createToPostUrl(url)
         val expectedResult = UrlResult(
             alias = "someId",
             link = Link(self = url, short = "https://sh.rt/someId")
@@ -98,7 +98,6 @@ class UrlShortenerViewModelTest {
         viewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Loading)
         advanceUntilIdle()
-
 
         coVerify { repository.postUrl(urlShortener) }
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Success<*>)
@@ -145,7 +144,7 @@ class UrlShortenerViewModelTest {
     @Test
     fun `postAction PostShortUrlEvent when repository returns null`() = runTest {
         val url = "https://google.com"
-        val urlShortener = UrlShortener.create(url)
+        val urlShortener = UrlShortener.createToPostUrl(url)
 
         viewModel.onChangeTextFieldContent(url)
         coEvery { repository.postUrl(any<UrlShortener>()) } returns null
@@ -186,7 +185,7 @@ class UrlShortenerViewModelTest {
     @Test
     fun `postAction GetShortUrlEvent triggers repository call`() = runTest {
         val id = "someId"
-        val expectedResult = UrlShortener.createFromResult(
+        val expectedResult = UrlShortener.createFromGetResult(
             url = "https://sh.rt/$id"
         )
         coEvery { repository.getUrlShortener(id) } returns expectedResult
@@ -209,14 +208,13 @@ class UrlShortenerViewModelTest {
 
         // First call
         viewModel.onChangeTextFieldContent(url1)
-        coEvery { repository.postUrl(UrlShortener.create(url1)) } returns result1
+        coEvery { repository.postUrl(UrlShortener.createToPostUrl(url1)) } returns result1
         viewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
         advanceUntilIdle()
 
-
         // Second call
         viewModel.onChangeTextFieldContent(url2)
-        coEvery { repository.postUrl(UrlShortener.create(url2)) } returns result2
+        coEvery { repository.postUrl(UrlShortener.createToPostUrl(url2)) } returns result2
         viewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
         advanceUntilIdle()
 
@@ -232,8 +230,8 @@ class UrlShortenerViewModelTest {
         val result1 = UrlResult(alias = "1", link = Link(self = url1, short = "short1"))
         val result2 = UrlResult(alias = "2", link = Link(self = url2, short = "short2"))
 
-        coEvery { repository.postUrl(UrlShortener.create(url1)) } returns result1
-        coEvery { repository.postUrl(UrlShortener.create(url2)) } returns result2
+        coEvery { repository.postUrl(UrlShortener.createToPostUrl(url1)) } returns result1
+        coEvery { repository.postUrl(UrlShortener.createToPostUrl(url2)) } returns result2
 
         viewModel.onChangeTextFieldContent(url1)
         viewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
