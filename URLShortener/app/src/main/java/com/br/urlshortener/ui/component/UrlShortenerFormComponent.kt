@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -49,7 +48,6 @@ private fun UrlShortenerForm(
     onSendClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-
     Row(
         modifier = modifier
             .systemBarsPadding()

@@ -1,7 +1,6 @@
 package com.br.urlshortener.ui.component
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -65,16 +64,16 @@ internal fun UrlShortenerList(
                 onClick = { onClickListener(url.alias) },
                 shape = RectangleShape
             ) {
-                Column() {
+                Column {
                     Text(
-                        text = "Short URL: ${url.link.short}",
+                        text = "Shorted URL: ${url.link.self}",
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp),
                     )
 
                     Text(
-                        text = "Original URL: ${url.link.self}",
+                        text = "Original URL: ${url.link.short}",
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp),
