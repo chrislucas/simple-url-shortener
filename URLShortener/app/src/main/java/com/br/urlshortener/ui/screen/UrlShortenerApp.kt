@@ -49,9 +49,9 @@ internal fun UrlShortenerApp(
         navController.navigate(NavRoute.UrlDetailScreenRoute.name)
         viewModel.putUiOnIdle()
     }
-
     val onBackPressed: () -> Unit = {
         backToShortenerUrlScreen(navController)
+        viewModel.putUiOnIdle()
     }
 
     Scaffold(
@@ -80,7 +80,8 @@ internal fun UrlShortenerApp(
                 UrlShortenerScreen(
                     modifier = modifier.fillMaxHeight(),
                     urlShortenerViewModel = viewModel,
-                    onClickItem = onClickItem
+                    onClickItem = onClickItem,
+                    onBackPressed = onBackPressed
                 )
             }
 

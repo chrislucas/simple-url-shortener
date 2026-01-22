@@ -88,7 +88,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     // Add KTX extensions for lifecycle-aware components (optional but recommended)
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
 
     // Retrofit main library
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
@@ -101,10 +100,9 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
 
     // Optional: Kotlin Coroutines for asynchronous operations
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation(libs.androidx.compose.foundation.layout)
     implementation("androidx.navigation:navigation-compose:2.9.6")
-    implementation("androidx.compose.material:material-icons-core:1.7.8")
+    implementation("androidx.compose.material:material-icons-core")
 
     // Splash Screen API
     implementation("androidx.core:core-splashscreen:1.0.1")

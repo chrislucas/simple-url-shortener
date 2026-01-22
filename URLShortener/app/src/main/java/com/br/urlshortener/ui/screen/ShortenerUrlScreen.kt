@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -11,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.br.urlshortener.domain.model.UrlResult
 import com.br.urlshortener.domain.model.UrlShortener
@@ -28,19 +30,21 @@ internal fun UrlShortenerScreen(
     modifier: Modifier = Modifier,
     urlShortenerViewModel: UrlShortenerViewModel,
     onClickItem: () -> Unit = {},
-    onBackPressed: () -> Unit = {},
+    onBackPressed: () -> Unit,
 ) {
     val uiState by urlShortenerViewModel.uiState.collectAsState()
     when (uiState) {
         is UrlShortenerUIState.Loading -> {
             LoadingOverlayComponent()
             UrlShortenerForm(modifier, urlShortenerViewModel, onClickItem)
+            urlShortenerViewModel.putUiOnIdle()
         }
 
         is UrlShortenerUIState.Error -> {
             val errorMessage = (uiState as UrlShortenerUIState.Error).message
             ErrorOverlayComponent(errorMessage)
             UrlShortenerForm(modifier, urlShortenerViewModel, onClickItem)
+            urlShortenerViewModel.putUiOnIdle()
         }
 
         is UrlShortenerUIState.Success<*> -> {
@@ -76,7 +80,7 @@ private fun UrlShortenerForm(
             urlShortenerViewModel = urlShortenerViewModel
         )
         UrlShortenerListComponent(
-            modifier = Modifier,
+            modifier = Modifier.padding(top = 3.dp, bottom = 3.dp),
             urlShortenerViewModel = urlShortenerViewModel,
             onClickItem = onClickItem
         )

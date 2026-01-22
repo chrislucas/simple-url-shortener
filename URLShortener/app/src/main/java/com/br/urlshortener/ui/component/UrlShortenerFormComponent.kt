@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -48,15 +49,19 @@ private fun UrlShortenerForm(
     onSendClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
     Row(
         modifier = modifier
+            .systemBarsPadding()
+            .height(IntrinsicSize.Max)
             .fillMaxWidth()
-            .height(IntrinsicSize.Min),
+            .padding(4.dp),
+
         verticalAlignment = Alignment.CenterVertically
     ) {
         OutlinedTextField(
             modifier = Modifier
-                .weight(.6f)
+                .weight(0.70f)
                 .fillMaxHeight(),
             value = content,
             onValueChange = onContentChange,
@@ -65,9 +70,9 @@ private fun UrlShortenerForm(
 
         Button(
             modifier = Modifier
-                .weight(.4f)
-                .fillMaxHeight()
-                .padding(4.dp),
+                .padding(start = 2.dp)
+                .weight(0.30f)
+                .fillMaxHeight(),
             onClick = onSendClick,
             shape = RectangleShape
         ) {
