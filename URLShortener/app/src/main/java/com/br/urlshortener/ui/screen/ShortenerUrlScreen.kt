@@ -22,6 +22,7 @@ import com.br.urlshortener.ui.component.ErrorOverlayComponent
 import com.br.urlshortener.ui.component.LoadingOverlayComponent
 import com.br.urlshortener.ui.component.UrlShortenerFormComponent
 import com.br.urlshortener.ui.component.UrlShortenerListComponent
+import com.br.urlshortener.ui.event.UrlShortenerUIEvent
 import com.br.urlshortener.ui.state.UrlShortenerUIState
 import com.br.urlshortener.ui.theme.URLShortenerTheme
 import com.br.urlshortener.viewmodel.UrlShortenerViewModel
@@ -67,6 +68,9 @@ private fun UrlShortenerForm(
     urlShortenerViewModel: UrlShortenerViewModel = viewModel(factory = UrlShortenerViewModel.FACTORY),
     onClickItem: () -> Unit = {}
 ) {
+
+    val urls by urlShortenerViewModel.urls.collectAsState()
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -80,9 +84,11 @@ private fun UrlShortenerForm(
         )
         UrlShortenerListComponent(
             modifier = Modifier.padding(top = 3.dp, bottom = 3.dp),
-            urlShortenerViewModel = urlShortenerViewModel,
-            onClickItem = onClickItem
-        )
+            urls.toList()
+        ) { pathId ->
+            urlShortenerViewModel.interpreter(UrlShortenerUIEvent.GetShortUrlEvent(pathId))
+            onClickItem()
+        }
     }
 }
 

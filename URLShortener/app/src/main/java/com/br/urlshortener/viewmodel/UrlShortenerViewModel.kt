@@ -30,8 +30,8 @@ class UrlShortenerViewModel(
     private val mutableTextFieldContent: MutableStateFlow<String> = MutableStateFlow("")
     val textFieldContent: StateFlow<String> = mutableTextFieldContent.asStateFlow()
 
-    private val shortUrls = MutableStateFlow<List<UrlResult>>(emptyList())
-    val urls: StateFlow<List<UrlResult>> = shortUrls.asStateFlow()
+    private val shortUrls = MutableStateFlow<Set<UrlResult>>(emptySet())
+    val urls: StateFlow<Set<UrlResult>> = shortUrls.asStateFlow()
 
     private val mutableUiSate: MutableStateFlow<UrlShortenerUIState> =
         MutableStateFlow(UrlShortenerUIState.Idle)
@@ -41,6 +41,10 @@ class UrlShortenerViewModel(
 
     private val mutableUrlShortener = MutableStateFlow<UrlShortener?>(null)
     val urlShortener: StateFlow<UrlShortener?> = mutableUrlShortener.asStateFlow()
+
+    fun onChangeTextFieldContent(newValue: String) {
+        mutableTextFieldContent.value = newValue
+    }
 
     fun interpreter(action: UrlShortenerUIEvent) {
         mutableUiSate.update { UrlShortenerUIState.Loading }
@@ -106,10 +110,6 @@ class UrlShortenerViewModel(
                 }
             }
         }
-    }
-
-    fun onChangeTextFieldContent(newValue: String) {
-        mutableTextFieldContent.value = newValue
     }
 
     companion object {

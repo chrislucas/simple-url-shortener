@@ -36,6 +36,9 @@ enum class NavRoute(@field:StringRes val title: Int) {
     UrlDetailScreenRoute(title = R.string.shortener_url_detail),
 }
 
+
+
+
 @Composable
 internal fun UrlShortenerApp(
     modifier: Modifier = Modifier,
@@ -46,11 +49,12 @@ internal fun UrlShortenerApp(
 
     val currentScreen = NavRoute.valueOf(backStackEntry?.destination?.route ?: NavRoute.SplashScreenRoute.name)
 
-    val onClickItem: () -> Unit = {
+    val goToDetailUrl: () -> Unit = {
         navController.navigate(NavRoute.UrlDetailScreenRoute.name)
         viewModel.putUiOnIdle()
     }
-    val onBackPressed: () -> Unit = {
+
+    val backToShortenerUrlScreen: () -> Unit = {
         backToShortenerUrlScreen(navController)
         viewModel.putUiOnIdle()
     }
@@ -83,13 +87,13 @@ internal fun UrlShortenerApp(
                 UrlShortenerScreen(
                     modifier = modifier.fillMaxHeight(),
                     urlShortenerViewModel = viewModel,
-                    onClickItem = onClickItem,
-                    onBackPressed = onBackPressed
+                    onClickItem = goToDetailUrl,
+                    onBackPressed = backToShortenerUrlScreen
                 )
             }
 
             composable(route = NavRoute.UrlDetailScreenRoute.name) {
-                urlShortener?.let { UrlDetailScreen(it.url, onBackPressed) }
+                urlShortener?.let { UrlDetailScreen(it.url, backToShortenerUrlScreen) }
             }
         }
     }

@@ -4,7 +4,8 @@ import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -26,7 +27,7 @@ fun SplashScreen(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
     val scale = remember { Animatable(0f) }
     LaunchedEffect(key1 = true) {
         scale.animateTo(
-            targetValue = 0.3f,
+            targetValue = 1f,
             animationSpec = tween(
                 durationMillis = 1000,
                 easing = {
@@ -37,8 +38,9 @@ fun SplashScreen(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
         delay(1000L)
         onClose()
     }
-    Box(
-        contentAlignment = Alignment.Center,
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
         modifier = modifier.fillMaxSize(),
     ) {
         Image(

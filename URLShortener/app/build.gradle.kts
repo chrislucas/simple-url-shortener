@@ -104,6 +104,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.9.6")
     implementation("androidx.compose.material:material-icons-core")
 
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.4.0")
+
     // Splash Screen API
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.androidx.compose.runtime)

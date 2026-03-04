@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,26 +27,10 @@ import com.br.urlshortener.viewmodel.UrlShortenerViewModel
 @Composable
 internal fun UrlShortenerListComponent(
     modifier: Modifier = Modifier,
-    urlShortenerViewModel: UrlShortenerViewModel,
-    onClickItem: () -> Unit = {}
+    urls: List<UrlResult>,
+    onClickItem: (String) -> Unit
 ) {
-    val uiState by urlShortenerViewModel.uiState.collectAsState()
-    when (uiState) {
-        is UrlShortenerUIState.Success<*> -> {
-            val url = (uiState as UrlShortenerUIState.Success<*>).data
-            if (url is UrlShortener) {
-                onClickItem()
-            }
-        }
-
-        else -> {
-            // DO NOTHING
-        }
-    }
-    val urls by urlShortenerViewModel.urls.collectAsState()
-    UrlShortenerList(modifier, urls) { id ->
-        urlShortenerViewModel.interpreter(UrlShortenerUIEvent.GetShortUrlEvent(id))
-    }
+    UrlShortenerList(modifier, urls, onClickItem)
 }
 
 @Composable
@@ -55,8 +40,7 @@ internal fun UrlShortenerList(
     onClickListener: (String) -> Unit
 ) {
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
-        items(urls.size) { index ->
-            val url = urls[index]
+        items(items = urls, key = { url -> url.alias }) { url ->
             Card(
                 modifier = modifier
                     .fillParentMaxWidth()
@@ -66,14 +50,14 @@ internal fun UrlShortenerList(
             ) {
                 Column {
                     Text(
-                        text = "Shorted URL: ${url.link.self}",
+                        text = "Shorted URL: ${url.link.short}",
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp),
                     )
 
                     Text(
-                        text = "Original URL: ${url.link.short}",
+                        text = "Original URL: ${url.link.self}",
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp),
