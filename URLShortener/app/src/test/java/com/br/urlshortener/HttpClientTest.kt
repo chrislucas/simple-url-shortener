@@ -12,7 +12,7 @@ import org.junit.Test
 import retrofit2.Converter
 import retrofit2.Retrofit
 
-class HttpClientBuilderTest {
+class HttpClientTest {
 
     interface DummyService
 
@@ -47,7 +47,7 @@ class HttpClientBuilderTest {
         every { anyConstructed<Retrofit.Builder>().addConverterFactory(any<Converter.Factory>()) } returns mockBuilder
         every { anyConstructed<Retrofit.Builder>().build() } returns mockRetrofit
 
-        val service = HttpClientBuilder.createService<DummyService>(
+        val service = HttpClient.createService<DummyService>(
             url = "http://example.com/",
             isDebug = false,
         )
@@ -91,7 +91,7 @@ class HttpClientBuilderTest {
         every { anyConstructed<Retrofit.Builder>().addConverterFactory(any<Converter.Factory>()) } returns mockRetrofitBuilder
         every { anyConstructed<Retrofit.Builder>().build() } returns mockRetrofit
 
-        val service = HttpClientBuilder.createService<DummyService>(
+        val service = HttpClient.createService<DummyService>(
             url = "http://example.com/",
             isDebug = true,
         )
@@ -129,7 +129,7 @@ class HttpClientBuilderTest {
         every { anyConstructed<Retrofit.Builder>().addConverterFactory(any<Converter.Factory>()) } returns mockRetrofitBuilder
         every { anyConstructed<Retrofit.Builder>().build() } returns mockRetrofit
 
-        val service = HttpClientBuilder.createService<DummyService>(
+        val service = HttpClient.createService<DummyService>(
             url = "http://example.com/",
             isDebug = false,
         )

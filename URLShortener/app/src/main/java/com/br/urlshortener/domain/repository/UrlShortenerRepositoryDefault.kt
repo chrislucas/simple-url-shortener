@@ -8,12 +8,10 @@ import com.br.urlshortener.domain.model.UrlShortener
 
 class UrlShortenerRepositoryDefault(private val client: UrlShortenerClient) : UrlShortenerRepository {
 
-    override suspend fun postUrl(urlShortener: UrlShortener): UrlResult? {
-        val response = client.postUrl(UrlShortenerDTO(urlShortener.url))
-        return if (response.isSuccessful) {
-            val result = response.body()
-            // Handle successful response if needed
-            result?.let {
+    override suspend fun postUrl(urlShortener: UrlShortener): RepositoryResult<UrlResult> {
+        val call = suspend { client.postUrl(UrlShortenerDTO(urlShortener.url)) }
+        return SafeRepository.remoteCall(call) { responseBody ->
+            responseBody.let {
                 UrlResult(
                     alias = it.alias,
                     link = Link(
@@ -22,21 +20,13 @@ class UrlShortenerRepositoryDefault(private val client: UrlShortenerClient) : Ur
                     )
                 )
             }
-        } else {
-            // Handle error response if needed
-            null
         }
     }
 
-    override suspend fun getUrlShortener(id: String): UrlShortener? {
-        val response = client.getUrlShortener(id)
-        return if (response.isSuccessful) {
-            val result = response.body()
-            result?.let { urlShortener ->
-                UrlShortener.createFromGetResult(urlShortener.tinyUrl)
-            }
-        } else {
-            null
+    override suspend fun getUrlShortener(id: String): RepositoryResult<UrlShortener> {
+        val call = suspend { client.getUrlShortener(id) }
+        return SafeRepository.remoteCall(call) { responseBody ->
+            UrlShortener.createFromGetResult(responseBody.tinyUrl)
         }
     }
 }

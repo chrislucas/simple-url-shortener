@@ -39,7 +39,7 @@ internal fun UrlShortenerListComponent(
         }
 
         else -> {
-            // DO NOTHINH
+            // DO NOTHING
         }
     }
     val urls by urlShortenerViewModel.urls.collectAsState()
