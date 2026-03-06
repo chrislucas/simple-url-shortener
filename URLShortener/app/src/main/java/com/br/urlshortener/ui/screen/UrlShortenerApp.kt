@@ -31,7 +31,9 @@ import com.br.urlshortener.viewmodel.UrlShortenerViewModel
 
 enum class NavRoute(@field:StringRes val title: Int) {
     SplashScreenRoute(title = R.string.app_name),
-    ShortenerUrlScreenRoute(title = R.string.list_shortener_url),
+    ShortenerUrlScreenRoute(title = R.string.shortener_url),
+
+    ListShortenerUrl(title = R.string.list_shortener_url),
     UrlDetailScreenRoute(title = R.string.shortener_url_detail),
 }
 
@@ -47,6 +49,11 @@ internal fun UrlShortenerApp(
 
     val onClickItem: () -> Unit = {
         navController.navigate(NavRoute.UrlDetailScreenRoute.name)
+        viewModel.putUiOnIdle()
+    }
+
+    val showListShortUrl: () -> Unit = {
+        navController.navigate(NavRoute.ListShortenerUrl.name)
         viewModel.putUiOnIdle()
     }
 
@@ -80,13 +87,17 @@ internal fun UrlShortenerApp(
                 UrlShortenerScreen(
                     modifier = modifier.fillMaxHeight(),
                     urlShortenerViewModel = viewModel,
-                    onClickItem = onClickItem
+                    onClickItem = showListShortUrl
                 )
+            }
+
+            composable(route = NavRoute.ListShortenerUrl.name) {
+                ListValidUrls(modifier = Modifier.fillMaxSize(), urlShortenerViewModel = viewModel, onClickItem)
             }
 
             composable(route = NavRoute.UrlDetailScreenRoute.name) {
                 viewModel.urlShortener.value?.let {
-                    UrlDetailScreen(it.url, onBackPressed)
+                    UrlDetailScreen(it.url, showListShortUrl)
                 }
             }
         }

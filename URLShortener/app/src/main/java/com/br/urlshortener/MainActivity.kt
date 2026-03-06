@@ -41,60 +41,16 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
+/*
+    TODO
+    -> Criar um componente que
+        - Mostra a ultima URL que o usuario enviou
+        - Mostra um botão que leva para uma tela com a lista de URL
+    -> Criar um componente para exibir todas as URLS
+ */
+
 @Composable
 internal fun UrlShortenerScreenApp(modifier: Modifier = Modifier) {
     UrlShortenerApp(modifier = modifier)
-}
-
-@Deprecated("Use UrlShortenerInitApp instead")
-@Composable
-internal fun UrlShortenerScreen(
-    modifier: Modifier = Modifier,
-    urlShortenerViewModel: UrlShortenerViewModel = viewModel(
-        factory = UrlShortenerViewModel.FACTORY
-    )
-) {
-    val uiState = urlShortenerViewModel.uiState.collectAsState()
-    when (uiState.value) {
-        is UrlShortenerUIState.Loading -> {
-            // You can add a loading indicator here
-            LoadingOverlayComponent()
-        }
-
-        is UrlShortenerUIState.Success<*> -> {
-            val s = (uiState.value as UrlShortenerUIState.Success<*>).data
-            if (s is UrlShortener) {
-                UrlDetailScreen(s.url)
-            } else {
-                UrlShortenerForm(modifier, urlShortenerViewModel)
-            }
-        }
-
-        is UrlShortenerUIState.Error -> {
-            // You can show an error message here
-            ErrorOverlayComponent()
-        }
-
-        else -> {
-            UrlShortenerForm(modifier, urlShortenerViewModel)
-        }
-    }
-}
-
-@Composable
-private fun UrlShortenerForm(
-    modifier: Modifier = Modifier,
-    urlShortenerViewModel: UrlShortenerViewModel = viewModel(factory = UrlShortenerViewModel.FACTORY)
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .navigationBarsPadding()
-            .systemBarsPadding()
-            .padding(2.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        UrlShortenerFormComponent(modifier, urlShortenerViewModel)
-        UrlShortenerListComponent(modifier, urlShortenerViewModel)
-    }
 }

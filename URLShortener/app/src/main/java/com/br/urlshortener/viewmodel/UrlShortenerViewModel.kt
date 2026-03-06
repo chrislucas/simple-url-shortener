@@ -44,6 +44,9 @@ class UrlShortenerViewModel(
     private val _urlShortener = mutableStateOf<UrlShortener?>(null)
     val urlShortener: State<UrlShortener?> = _urlShortener
 
+    private val mutableLastValidUrl = MutableStateFlow<UrlResult?>(null)
+    val lastValidUrl: StateFlow<UrlResult?> = mutableLastValidUrl.asStateFlow()
+
     fun interpreter(action: UrlShortenerUIEvent) {
         mutableUiSate.update { UrlShortenerUIState.Loading }
         when (action) {
@@ -72,6 +75,7 @@ class UrlShortenerViewModel(
                 val result = repository.postUrl(urlShortener)
                 result?.let { nonNullResult ->
                     shortUrls.update { it + nonNullResult }
+                    mutableLastValidUrl.update { nonNullResult }
                     mutableUiSate.update { UrlShortenerUIState.Success(nonNullResult) }
                 } ?: run {
                     mutableUiSate.update { UrlShortenerUIState.Error("Failed to post shorten URL") }
