@@ -108,7 +108,7 @@ class UrlShortenerListComponentTest {
         composeRule.onNodeWithText("https://short/1").performClick()
 
         verify(exactly = 1) {
-            viewModel.interpreter(
+            viewModel.uiEventInterpreter(
                 match { event ->
                     event is UrlShortenerUIEvent.GetShortUrlEvent &&
                         event.id == "alias-1"

@@ -14,9 +14,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -28,6 +32,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.br.urlshortener.R
+import com.br.urlshortener.ui.event.UrlShortenerEvent
 import com.br.urlshortener.viewmodel.UrlShortenerViewModel
 
 enum class NavRoute(@field:StringRes val title: Int) {
@@ -36,9 +41,6 @@ enum class NavRoute(@field:StringRes val title: Int) {
     UrlDetailScreenRoute(title = R.string.shortener_url_detail),
 }
 
-
-
-
 @Composable
 internal fun UrlShortenerApp(
     modifier: Modifier = Modifier,
@@ -46,13 +48,9 @@ internal fun UrlShortenerApp(
     navController: NavHostController = rememberNavController()
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
+    val snackBarHostState = remember { SnackbarHostState() }
 
     val currentScreen = NavRoute.valueOf(backStackEntry?.destination?.route ?: NavRoute.SplashScreenRoute.name)
-
-    val goToDetailUrl: () -> Unit = {
-        navController.navigate(NavRoute.UrlDetailScreenRoute.name)
-        viewModel.putUiOnIdle()
-    }
 
     val backToShortenerUrlScreen: () -> Unit = {
         backToShortenerUrlScreen(navController)
@@ -61,9 +59,29 @@ internal fun UrlShortenerApp(
 
     val urlShortener by viewModel.urlShortener.collectAsState()
 
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { event ->
+            when (event) {
+                is UrlShortenerEvent.NavigateToDetail -> {
+                    navController.navigate(NavRoute.UrlDetailScreenRoute.name)
+                    viewModel.putUiOnIdle()
+                }
+
+                is UrlShortenerEvent.ShowSnackBar -> {
+                    snackBarHostState.showSnackbar(event.message)
+                }
+
+                is UrlShortenerEvent.ShowError -> {
+                    snackBarHostState.showSnackbar(message = event.message)
+                }
+            }
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackBarHostState) },
         topBar = {
-            UrlShortenerAppBar(
+            UrlShortenerTopAppBar(
                 currentScreen = currentScreen,
                 canNavigateBack = navController.previousBackStackEntry != null,
                 navigateUp = { navController.navigateUp() }
@@ -86,9 +104,7 @@ internal fun UrlShortenerApp(
             composable(route = NavRoute.ShortenerUrlScreenRoute.name) {
                 UrlShortenerScreen(
                     modifier = modifier.fillMaxHeight(),
-                    urlShortenerViewModel = viewModel,
-                    onClickItem = goToDetailUrl,
-                    onBackPressed = backToShortenerUrlScreen
+                    urlShortenerViewModel = viewModel
                 )
             }
 
@@ -101,7 +117,7 @@ internal fun UrlShortenerApp(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun UrlShortenerAppBar(
+private fun UrlShortenerTopAppBar(
     currentScreen: NavRoute,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
@@ -136,8 +152,8 @@ private fun backToShortenerUrlScreen(navController: NavHostController) {
 
 @Preview
 @Composable
-private fun UrlShortenerAppBarPreview() {
-    UrlShortenerAppBar(
+private fun UrlShortenerTopAppBarPreview() {
+    UrlShortenerTopAppBar(
         currentScreen = NavRoute.ShortenerUrlScreenRoute,
         canNavigateBack = true,
         navigateUp = {}

@@ -16,12 +16,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.br.urlshortener.domain.model.UrlResult
 import com.br.urlshortener.domain.model.UrlShortener
-import com.br.urlshortener.domain.repository.RepositoryResult
 import com.br.urlshortener.domain.repository.UrlShortenerRepository
-import com.br.urlshortener.ui.component.ErrorOverlayComponent
 import com.br.urlshortener.ui.component.LoadingOverlayComponent
 import com.br.urlshortener.ui.component.UrlShortenerFormComponent
 import com.br.urlshortener.ui.component.UrlShortenerListComponent
+import com.br.urlshortener.domain.repository.RepositoryResult
 import com.br.urlshortener.ui.event.UrlShortenerUIEvent
 import com.br.urlshortener.ui.state.UrlShortenerUIState
 import com.br.urlshortener.ui.theme.URLShortenerTheme
@@ -31,44 +30,19 @@ import com.br.urlshortener.viewmodel.UrlShortenerViewModel
 internal fun UrlShortenerScreen(
     modifier: Modifier = Modifier,
     urlShortenerViewModel: UrlShortenerViewModel,
-    onClickItem: () -> Unit = {},
-    onBackPressed: () -> Unit,
 ) {
     val uiState by urlShortenerViewModel.uiState.collectAsState()
-    when (uiState) {
-        is UrlShortenerUIState.Loading -> {
-            LoadingOverlayComponent()
-            UrlShortenerForm(modifier, urlShortenerViewModel, onClickItem)
-        }
-
-        is UrlShortenerUIState.Error -> {
-            val errorMessage = (uiState as UrlShortenerUIState.Error).message
-            ErrorOverlayComponent(errorMessage)
-            UrlShortenerForm(modifier, urlShortenerViewModel, onClickItem)
-        }
-
-        is UrlShortenerUIState.Success<*> -> {
-            val s = (uiState as UrlShortenerUIState.Success<*>).data
-            if (s is UrlShortener && !s.url.isEmpty()) {
-                UrlDetailScreen(s.url, onBackPressed)
-            } else {
-                UrlShortenerForm(modifier, urlShortenerViewModel, onClickItem)
-            }
-        }
-
-        else -> {
-            UrlShortenerForm(modifier, urlShortenerViewModel, onClickItem)
-        }
+    if (uiState is UrlShortenerUIState.Loading) {
+        LoadingOverlayComponent()
     }
+    UrlShortenerForm(modifier, urlShortenerViewModel)
 }
 
 @Composable
 private fun UrlShortenerForm(
     modifier: Modifier = Modifier,
-    urlShortenerViewModel: UrlShortenerViewModel = viewModel(factory = UrlShortenerViewModel.FACTORY),
-    onClickItem: () -> Unit = {}
+    urlShortenerViewModel: UrlShortenerViewModel = viewModel(factory = UrlShortenerViewModel.FACTORY)
 ) {
-
     val urls by urlShortenerViewModel.urls.collectAsState()
 
     Column(
@@ -84,11 +58,11 @@ private fun UrlShortenerForm(
         )
         UrlShortenerListComponent(
             modifier = Modifier.padding(top = 3.dp, bottom = 3.dp),
-            urls.toList()
-        ) { pathId ->
-            urlShortenerViewModel.interpreter(UrlShortenerUIEvent.GetShortUrlEvent(pathId))
-            onClickItem()
-        }
+            urls = urls.toList(),
+            onClickItem = { pathId ->
+                urlShortenerViewModel.uiEventInterpreter(UrlShortenerUIEvent.GetShortUrlEvent(pathId))
+            }
+        )
     }
 }
 

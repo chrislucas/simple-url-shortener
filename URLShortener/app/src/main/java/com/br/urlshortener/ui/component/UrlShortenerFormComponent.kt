@@ -38,7 +38,7 @@ internal fun UrlShortenerFormComponent(
         content = content,
         onContentChange = urlShortenerViewModel::onChangeTextFieldContent,
         onSendClick = {
-            urlShortenerViewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
+            urlShortenerViewModel.uiEventInterpreter(UrlShortenerUIEvent.PostShortUrlEvent)
         },
         modifier = modifier
     )
