@@ -23,7 +23,10 @@ import kotlinx.coroutines.delay
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun SplashScreen(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
+fun SplashScreen(
+    modifier: Modifier = Modifier,
+    onClose: () -> Unit = {}
+) {
     val scale = remember { Animatable(0f) }
     LaunchedEffect(key1 = true) {
         scale.animateTo(
