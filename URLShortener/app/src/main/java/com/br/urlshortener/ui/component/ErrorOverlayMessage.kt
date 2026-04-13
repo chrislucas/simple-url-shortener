@@ -13,6 +13,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.zIndex
+import com.br.urlshortener.ui.theme.URLShortenerTheme
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -32,6 +33,35 @@ fun ErrorOverlayComponent(message: String = "Android") {
                 color = MaterialTheme.colorScheme.primary,
                 fontFamily = MaterialTheme.typography.headlineLarge.fontFamily
             )
+        )
+    }
+}
+
+@Composable
+fun ErrorComponent(modifier: Modifier, message: String = "Android") {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = message,
+            textAlign = TextAlign.Center,
+            style = TextStyle(
+                fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                color = MaterialTheme.colorScheme.primary,
+                fontFamily = MaterialTheme.typography.headlineLarge.fontFamily
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ErrorComponentPreview() {
+    URLShortenerTheme {
+        ErrorComponent(
+            modifier = Modifier.fillMaxSize(),
+            message = "Any error"
         )
     }
 }

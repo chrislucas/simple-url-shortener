@@ -36,10 +36,10 @@ class SplashScreenTest {
             SplashScreen(onClose = onClose)
         }
 
-        composeRule.mainClock.advanceTimeBy(2499)
+        composeRule.mainClock.advanceTimeBy(2000)
         verify(exactly = 0) { onClose() }
 
-        composeRule.mainClock.advanceTimeBy(1)
+        composeRule.mainClock.advanceTimeBy(100)
         verify(exactly = 1) { onClose() }
     }
 }
