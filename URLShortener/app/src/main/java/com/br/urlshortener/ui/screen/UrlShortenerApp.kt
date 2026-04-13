@@ -64,7 +64,6 @@ internal fun UrlShortenerApp(
             when (event) {
                 is UrlShortenerEvent.NavigateToDetail -> {
                     navController.navigate(NavRoute.UrlDetailScreenRoute.name)
-                    viewModel.putUiOnIdle()
                 }
 
                 is UrlShortenerEvent.ShowSnackBar -> {
