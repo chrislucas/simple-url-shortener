@@ -59,7 +59,6 @@ private fun UrlShortenerForm(
     urlShortenerViewModel: UrlShortenerViewModel = viewModel(factory = UrlShortenerViewModel.FACTORY),
 ) {
     val urls by urlShortenerViewModel.urls.collectAsState()
-
     Column(
         modifier = modifier
             .fillMaxSize()
