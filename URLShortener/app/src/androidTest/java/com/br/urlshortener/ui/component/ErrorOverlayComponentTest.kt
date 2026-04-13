@@ -17,7 +17,7 @@ class ErrorOverlayComponentTest {
     @Test
     fun given_custom_message_when_render_error_overlay_then_show_message() {
         composeRule.setContent {
-            ErrorOverlayComponent(message = "Network error")
+            OverlayErrorComponent(message = "Network error")
         }
 
         composeRule.onNodeWithText("Network error").assertIsDisplayed()
@@ -26,7 +26,7 @@ class ErrorOverlayComponentTest {
     @Test
     fun given_no_message_when_render_error_overlay_then_show_default_message() {
         composeRule.setContent {
-            ErrorOverlayComponent()
+            OverlayErrorComponent()
         }
 
         composeRule.onNodeWithText("Android").assertIsDisplayed()

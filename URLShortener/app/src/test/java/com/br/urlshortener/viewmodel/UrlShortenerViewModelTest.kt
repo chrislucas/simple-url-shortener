@@ -136,7 +136,7 @@ class UrlShortenerViewModelTest {
         
         assertEquals(1, events.size)
         assertTrue(events[0] is UrlShortenerEvent.ShowError)
-        assertEquals("Invalid URL format", (events[0] as UrlShortenerEvent.ShowError).message)
+        assertEquals("Invalid URL format: $invalidUrl", (events[0] as UrlShortenerEvent.ShowError).message)
         
         job.cancel()
     }
