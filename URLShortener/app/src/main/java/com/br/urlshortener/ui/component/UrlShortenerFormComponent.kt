@@ -8,14 +8,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,7 +38,7 @@ internal fun UrlShortenerFormComponent(
         content = content,
         onContentChange = urlShortenerViewModel::onChangeTextFieldContent,
         onSendClick = {
-            urlShortenerViewModel.interpreter(UrlShortenerUIEvent.PostShortUrlEvent)
+            urlShortenerViewModel.uiEventInterpreter(UrlShortenerUIEvent.PostShortUrlEvent)
         },
         modifier = modifier
     )
@@ -50,24 +53,43 @@ private fun UrlShortenerForm(
 ) {
     Row(
         modifier = modifier
+            .systemBarsPadding()
+            .height(IntrinsicSize.Max)
             .fillMaxWidth()
-            .height(IntrinsicSize.Min),
+            .padding(4.dp),
+
         verticalAlignment = Alignment.CenterVertically
     ) {
         OutlinedTextField(
             modifier = Modifier
-                .weight(.6f)
+                .weight(.7f)
                 .fillMaxHeight(),
             value = content,
             onValueChange = onContentChange,
             label = { Text(text = stringResource(id = R.string.enter_valid_url)) },
         )
 
+        VerticalDivider(
+            modifier = Modifier
+                .width(8.dp)
+                .padding(
+                    start = 3.dp,
+                    end = 1.dp,
+                    top = 8.dp
+                ),
+            thickness = 1.dp,
+            color = Color.Black
+        )
+
         Button(
             modifier = Modifier
-                .weight(.4f)
-                .fillMaxHeight()
-                .padding(4.dp),
+                .weight(.3f)
+                /*
+                    ajuste para compensar o paddingTop de 8.dp que o componente outlined_text_field possui
+                    no material design 3
+                 */
+                .padding(top = 8.dp)
+                .fillMaxHeight(),
             onClick = onSendClick,
             shape = RectangleShape
         ) {

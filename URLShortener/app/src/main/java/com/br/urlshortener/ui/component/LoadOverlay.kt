@@ -23,6 +23,8 @@ fun LoadingOverlayComponent() {
             .zIndex(1f),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator()
+        CircularProgressIndicator(
+            modifier = Modifier.testTag("progress_indicator")
+        )
     }
 }

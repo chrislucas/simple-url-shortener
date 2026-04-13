@@ -16,8 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import com.br.urlshortener.R
 import com.br.urlshortener.ui.theme.URLShortenerTheme
@@ -40,15 +43,15 @@ fun UrlDetailScreen(
             text = "URL $url!",
             textAlign = TextAlign.Center,
             style = TextStyle(
-                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                fontSize = TextUnit(22f, TextUnitType.Sp),
                 color = MaterialTheme.colorScheme.primary,
-                fontFamily = MaterialTheme.typography.bodyMedium.fontFamily
+                fontFamily = FontFamily.SansSerif
             )
         )
 
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = onBackPressed,
+            onClick = { onBackPressed() },
             shape = RectangleShape
         ) {
             Text(stringResource(R.string.back_button))
@@ -59,7 +62,7 @@ fun UrlDetailScreen(
 @Preview(showBackground = true)
 @Composable
 fun UrlDetailScreenPreview() {
-    URLShortenerTheme {
+    URLShortenerTheme(dynamicColor = false) {
         UrlDetailScreen("https://example.com")
     }
 }

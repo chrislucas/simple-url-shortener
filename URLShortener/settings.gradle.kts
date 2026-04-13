@@ -12,6 +12,11 @@ pluginManagement {
     }
 }
 plugins {
+    /*
+        https://github.com/gradle/foojay-toolchains
+        foojay Disco API
+        https://github.com/foojayio/discoapi
+     */
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 dependencyResolutionManagement {

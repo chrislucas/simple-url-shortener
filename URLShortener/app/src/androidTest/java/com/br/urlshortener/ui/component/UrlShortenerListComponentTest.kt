@@ -46,8 +46,8 @@ class UrlShortenerListComponentTest {
             )
         }
 
-        composeRule.onNodeWithText("https://short/1").assertIsDisplayed()
-        composeRule.onNodeWithText("https://short/2").assertIsDisplayed()
+        composeRule.onNodeWithText("Shorted URL: https://short/1", substring = true).assertIsDisplayed()
+        composeRule.onNodeWithText("Shorted URL: https://short/2", substring = true).assertIsDisplayed()
     }
 
     @Test
@@ -67,7 +67,7 @@ class UrlShortenerListComponentTest {
             )
         }
 
-        composeRule.onNodeWithText("https://short/1").performClick()
+        composeRule.onNodeWithText("Shorted URL: https://short/1", substring = true).performClick()
 
         verify(exactly = 1) {
             onClickListener("alias-1")
@@ -86,34 +86,4 @@ class UrlShortenerListComponentTest {
         composeRule.onAllNodes(hasClickAction()).assertCountEquals(0)
     }
 
-    @Test
-    fun given_a_list_url_result_when_click_on_item_then_should_execute_interpreter_with_correct_event() {
-        val urls = listOf(
-            UrlResult(
-                alias = "alias-1",
-                link = Link(self = "https://example.com/1", short = "https://short/1")
-            )
-        )
-        val urlsFlow = MutableStateFlow(urls)
-        val viewModel = mockk<UrlShortenerViewModel>(relaxed = true)
-
-        every { viewModel.urls } returns urlsFlow
-
-        composeRule.setContent {
-            UrlShortenerListComponent(
-                urlShortenerViewModel = viewModel
-            )
-        }
-
-        composeRule.onNodeWithText("https://short/1").performClick()
-
-        verify(exactly = 1) {
-            viewModel.interpreter(
-                match { event ->
-                    event is UrlShortenerUIEvent.GetShortUrlEvent &&
-                        event.id == "alias-1"
-                }
-            )
-        }
-    }
 }

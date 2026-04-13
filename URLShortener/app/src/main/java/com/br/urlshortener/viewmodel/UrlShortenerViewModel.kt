@@ -1,23 +1,26 @@
 package com.br.urlshortener.viewmodel
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.br.urlshortener.BuildConfig
-import com.br.urlshortener.HttpClientBuilder
+import com.br.urlshortener.HttpClient
 import com.br.urlshortener.data.remote.UrlShortenerClient
 import com.br.urlshortener.domain.model.UrlResult
 import com.br.urlshortener.domain.model.UrlShortener
+import com.br.urlshortener.domain.repository.RepositoryResult
 import com.br.urlshortener.domain.repository.UrlShortenerRepository
 import com.br.urlshortener.domain.repository.UrlShortenerRepositoryDefault
+import com.br.urlshortener.ui.event.UrlShortenerEvent
 import com.br.urlshortener.ui.event.UrlShortenerUIEvent
 import com.br.urlshortener.ui.state.UrlShortenerUIState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -31,28 +34,43 @@ class UrlShortenerViewModel(
     private val mutableTextFieldContent: MutableStateFlow<String> = MutableStateFlow("")
     val textFieldContent: StateFlow<String> = mutableTextFieldContent.asStateFlow()
 
-    private val shortUrls = MutableStateFlow<List<UrlResult>>(emptyList())
-    val urls: StateFlow<List<UrlResult>> = shortUrls.asStateFlow()
+    private val shortUrls = MutableStateFlow<Set<UrlResult>>(emptySet())
+    val urls: StateFlow<Set<UrlResult>> = shortUrls.asStateFlow()
 
-    private val mutableUiSate: MutableStateFlow<UrlShortenerUIState> = MutableStateFlow(
-        UrlShortenerUIState.Idle
-    )
-    val uiState: StateFlow<UrlShortenerUIState> = mutableUiSate.asStateFlow()
+    private val mutableUiState: MutableStateFlow<UrlShortenerUIState> =
+        MutableStateFlow(UrlShortenerUIState.Idle)
+    val uiState: StateFlow<UrlShortenerUIState> = mutableUiState.asStateFlow()
 
-    fun putUiOnIdle() = mutableUiSate.update { UrlShortenerUIState.Idle }
+    private val mutableUrlShortener = MutableStateFlow<UrlShortener?>(null)
+    val urlShortener: StateFlow<UrlShortener?> = mutableUrlShortener.asStateFlow()
 
-    private val _urlShortener = mutableStateOf<UrlShortener?>(null)
-    val urlShortener: State<UrlShortener?> = _urlShortener
+    private val mutableNavigationEvent = MutableSharedFlow<UrlShortenerEvent>(replay = 0, extraBufferCapacity = 1)
+    val navigationEvent: SharedFlow<UrlShortenerEvent> = mutableNavigationEvent.asSharedFlow()
 
-    fun interpreter(action: UrlShortenerUIEvent) {
-        mutableUiSate.update { UrlShortenerUIState.Loading }
-        when (action) {
+    fun putUiOnIdle() {
+        mutableUiState.update { UrlShortenerUIState.Idle }
+        clearUrlShortener()
+    }
+
+    private fun clearUrlShortener() {
+        mutableUrlShortener.update { null }
+    }
+
+    fun onChangeTextFieldContent(newValue: String) {
+        mutableTextFieldContent.update { newValue }
+    }
+
+    fun uiEventInterpreter(uiEvent: UrlShortenerUIEvent) {
+        when (uiEvent) {
             is UrlShortenerUIEvent.PostShortUrlEvent -> {
+                mutableUiState.update { UrlShortenerUIState.Loading }
                 val currentUrl = mutableTextFieldContent.value
                 postUrl(currentUrl)
             }
+
             is UrlShortenerUIEvent.GetShortUrlEvent -> {
-                getUrlShortener(action.id)
+                clearUrlShortener()
+                getUrlShortener(uiEvent.id)
             }
         }
     }
@@ -62,24 +80,25 @@ class UrlShortenerViewModel(
             val urlShortener = try {
                 UrlShortener.createToPostUrl(url)
             } catch (_: Exception) {
-                mutableUiSate.update {
-                    UrlShortenerUIState.Error("Invalid URL format")
-                }
+                mutableUiState.update { UrlShortenerUIState.Idle }
+                mutableNavigationEvent.emit(UrlShortenerEvent.ShowError("Invalid URL format"))
                 return@launch
             }
 
-            try {
-                val result = repository.postUrl(urlShortener)
-                result?.let { nonNullResult ->
-                    shortUrls.update { it + nonNullResult }
-                    mutableUiSate.update { UrlShortenerUIState.Success(nonNullResult) }
-                } ?: run {
-                    mutableUiSate.update { UrlShortenerUIState.Error("Failed to post shorten URL") }
+            when (val result = repository.postUrl(urlShortener)) {
+                is RepositoryResult.Success -> {
+                    shortUrls.update { currentShortUrls -> currentShortUrls + result.data }
+                    mutableUiState.update { UrlShortenerUIState.Idle }
+                    mutableNavigationEvent.emit(UrlShortenerEvent.ShowSnackBar("URL encurtada com sucesso"))
                 }
-            } catch (exception: Exception) {
-                val message = exception.message ?: "Failed to post shorten URL"
-                mutableUiSate.update {
-                    UrlShortenerUIState.Error(message)
+
+                is RepositoryResult.Error -> {
+                    mutableUiState.update { UrlShortenerUIState.Idle }
+                    mutableNavigationEvent.emit(
+                        UrlShortenerEvent.ShowError(
+                            "Failed to post shorten URL.\nMessage: ${result.message}. Status Code: ${result.code}."
+                        )
+                    )
                 }
             }
         }
@@ -87,25 +106,35 @@ class UrlShortenerViewModel(
 
     private fun getUrlShortener(id: String) {
         viewModelScope.launch(coroutineContext) {
-            try {
-                val urlShortener: UrlShortener? = repository.getUrlShortener(id)
-                _urlShortener.value = urlShortener
-                mutableUiSate.update { UrlShortenerUIState.Success(urlShortener) }
-            } catch (exception: Exception) {
-                val message = exception.message ?: "Failed to fetch shorten URL"
-                mutableUiSate.update { UrlShortenerUIState.Error(message) }
+            when (val result = repository.getUrlShortener(id)) {
+                is RepositoryResult.Success -> {
+                    mutableUrlShortener.update { result.data }
+                    mutableUiState.update { UrlShortenerUIState.Idle }
+                    mutableNavigationEvent.emit(UrlShortenerEvent.NavigateToDetail)
+                }
+
+                is RepositoryResult.Error -> {
+                    mutableUiState.update { UrlShortenerUIState.Idle }
+                    mutableNavigationEvent.emit(
+                        UrlShortenerEvent.ShowError(
+                            "Get Url Shortener Error.\nMessage: ${result.message}. Status Code: ${result.code}"
+                        )
+                    )
+                }
             }
         }
-    }
-
-    fun onChangeTextFieldContent(newValue: String) {
-        mutableTextFieldContent.value = newValue
     }
 
     companion object {
         val FACTORY = viewModelFactory {
             initializer {
-                val client = HttpClientBuilder.createService<UrlShortenerClient>(BuildConfig.BASE_URL)
+                val httpClientBuilder = HttpClient.Builder(BuildConfig.BASE_URL)
+                val httpClient = httpClientBuilder
+                    .withConnectionTimeout(20L)
+                    .withReadTimeout(20L)
+                    .isDebugMode(BuildConfig.DEBUG)
+                    .build()
+                val client = httpClient.createService(UrlShortenerClient::class)
                 val repository = UrlShortenerRepositoryDefault(client)
                 UrlShortenerViewModel(repository)
             }

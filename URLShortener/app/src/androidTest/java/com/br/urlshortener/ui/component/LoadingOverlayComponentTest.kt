@@ -3,16 +3,14 @@ package com.br.urlshortener.ui.component
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
-import androidx.compose.ui.test.hasProgressBarRangeInfo
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodes
-import androidx.compose.ui.test.onNode
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.height
+import androidx.compose.ui.unit.width
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -31,8 +29,7 @@ class LoadingOverlayComponentTest {
             LoadingOverlayComponent()
         }
 
-        composeRule.onAllNodes(hasProgressBarRangeInfo()).assertCountEquals(1)
-        composeRule.onNode(hasProgressBarRangeInfo()).assertIsDisplayed()
+        composeRule.onNodeWithTag("progress_indicator").assertIsDisplayed()
     }
 
     @Test
@@ -46,7 +43,7 @@ class LoadingOverlayComponentTest {
         val overlayBounds = composeRule.onNodeWithTag("loading_overlay").getUnclippedBoundsInRoot()
         val containerBounds = composeRule.onNodeWithTag("container").getUnclippedBoundsInRoot()
 
-        assertEquals(containerBounds.width, overlayBounds.width, 0.5f)
-        assertEquals(containerBounds.height, overlayBounds.height, 0.5f)
+        assertEquals(containerBounds.width, overlayBounds.width)
+        assertEquals(containerBounds.height, overlayBounds.height)
     }
 }

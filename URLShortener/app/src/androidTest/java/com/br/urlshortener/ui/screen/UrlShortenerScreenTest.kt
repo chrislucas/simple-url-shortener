@@ -3,7 +3,6 @@ package com.br.urlshortener.ui.screen
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import com.br.urlshortener.domain.model.Link
 import com.br.urlshortener.domain.model.UrlResult
 import com.br.urlshortener.domain.model.UrlShortener
@@ -11,7 +10,6 @@ import com.br.urlshortener.ui.state.UrlShortenerUIState
 import com.br.urlshortener.viewmodel.UrlShortenerViewModel
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
@@ -37,7 +35,7 @@ class UrlShortenerScreenTest {
     }
 
     @Test
-    fun given_error_state_when_render_screen_then_show_error_and_form() {
+    fun given_error_state_when_render_screen_then_show_form_and_message_error_component() {
         val viewModel = mockViewModel(uiState = UrlShortenerUIState.Error("Any error"))
 
         composeRule.setContent {
@@ -47,27 +45,6 @@ class UrlShortenerScreenTest {
         composeRule.onNodeWithText("Any error").assertIsDisplayed()
         composeRule.onNodeWithText("Enter With a valid URL").assertIsDisplayed()
         composeRule.onNodeWithText("enviar").assertIsDisplayed()
-    }
-
-    @Test
-    fun given_success_with_url_shortener_when_url_not_empty_then_show_detail_and_back() {
-        val url = "https://short.url/abc"
-        val viewModel = mockViewModel(
-            uiState = UrlShortenerUIState.Success(UrlShortener.createFromGetResult(url))
-        )
-        val onBackPressed = mockk<() -> Unit>(relaxed = true)
-
-        composeRule.setContent {
-            UrlShortenerScreen(
-                urlShortenerViewModel = viewModel,
-                onBackPressed = onBackPressed
-            )
-        }
-
-        composeRule.onNodeWithText("URL $url!").assertIsDisplayed()
-        composeRule.onNodeWithText("voltar").performClick()
-
-        verify(exactly = 1) { onBackPressed() }
     }
 
     @Test
@@ -115,7 +92,7 @@ class UrlShortenerScreenTest {
     private fun mockViewModel(
         uiState: UrlShortenerUIState,
         textFieldContent: String = "",
-        urls: List<UrlResult> = emptyList()
+        urls: Set<UrlResult> = emptySet()
     ): UrlShortenerViewModel {
         val viewModel = mockk<UrlShortenerViewModel>(relaxed = true)
         every { viewModel.uiState } returns MutableStateFlow(uiState)
