@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -17,11 +18,12 @@ import com.br.urlshortener.ui.theme.URLShortenerTheme
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun ErrorOverlayComponent(message: String = "Android") {
+fun OverlayErrorComponent(message: String = "Android") {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black.copy(alpha = 0.35f))
+            .testTag("overlay_error_component")
             .zIndex(1f),
         contentAlignment = Alignment.Center
     ) {

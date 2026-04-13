@@ -16,6 +16,7 @@ import com.br.urlshortener.ui.event.UrlShortenerEvent
 import com.br.urlshortener.ui.event.UrlShortenerUIEvent
 import com.br.urlshortener.ui.state.UrlShortenerUIState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -24,11 +25,13 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.time.delay
 import kotlin.coroutines.CoroutineContext
 
 class UrlShortenerViewModel(
     private val repository: UrlShortenerRepository,
-    private val coroutineContext: CoroutineContext = Dispatchers.IO
+    private val coroutineContext: CoroutineContext = Dispatchers.IO,
+    private val delayMillisOnError: Long = 2000L
 ) : ViewModel() {
 
     private val mutableTextFieldContent: MutableStateFlow<String> = MutableStateFlow("")
@@ -37,8 +40,9 @@ class UrlShortenerViewModel(
     private val shortUrls = MutableStateFlow<Set<UrlResult>>(emptySet())
     val urls: StateFlow<Set<UrlResult>> = shortUrls.asStateFlow()
 
-    private val mutableUiState: MutableStateFlow<UrlShortenerUIState> =
-        MutableStateFlow(UrlShortenerUIState.Idle)
+    private val mutableUiState: MutableStateFlow<UrlShortenerUIState> = MutableStateFlow(
+        UrlShortenerUIState.Idle
+    )
     val uiState: StateFlow<UrlShortenerUIState> = mutableUiState.asStateFlow()
 
     private val mutableUrlShortener = MutableStateFlow<UrlShortener?>(null)
@@ -80,8 +84,12 @@ class UrlShortenerViewModel(
             val urlShortener = try {
                 UrlShortener.createToPostUrl(url)
             } catch (_: Exception) {
+                val message = "Invalid URL format: $url"
+                mutableUiState.update { UrlShortenerUIState.Error(message) }
+                delay(delayMillisOnError)
+
                 mutableUiState.update { UrlShortenerUIState.Idle }
-                mutableNavigationEvent.emit(UrlShortenerEvent.ShowError("Invalid URL format"))
+                mutableNavigationEvent.emit(UrlShortenerEvent.ShowError(message))
                 return@launch
             }
 
@@ -93,12 +101,15 @@ class UrlShortenerViewModel(
                 }
 
                 is RepositoryResult.Error -> {
+                    val message =
+                        "Failed to post shorten URL.\nMessage: ${result.message}. Status Code: ${result.code}."
+                    mutableUiState.update {
+                        UrlShortenerUIState.Error(message)
+                    }
+
+                    delay(delayMillisOnError)
                     mutableUiState.update { UrlShortenerUIState.Idle }
-                    mutableNavigationEvent.emit(
-                        UrlShortenerEvent.ShowError(
-                            "Failed to post shorten URL.\nMessage: ${result.message}. Status Code: ${result.code}."
-                        )
-                    )
+                    mutableNavigationEvent.emit(UrlShortenerEvent.ShowError(message))
                 }
             }
         }
