@@ -82,6 +82,23 @@ dependencies {
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
 
+    implementation("com.google.android.gms:play-services-safetynet:18.1.0")
+
+    /*
+        https://developer.android.com/google/play/integrity/overview
+     */
+    implementation("com.google.android.play:integrity:1.6.0")
+
+    /*
+        https://firebase.google.com/docs/app-check/android/play-integrity-provider
+        // Import the BoM for the Firebase platform
+        implementation(platform("com.google.firebase:firebase-bom:34.11.0"))
+
+        // Add the dependencies for the App Check libraries
+        // When using the BoM, you don't specify versions in Firebase library dependencies
+        implementation("com.google.firebase:firebase-appcheck-playintegrity")
+     */
+
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
@@ -113,18 +130,18 @@ dependencies {
 
     // https://github.com/mrmans0n/compose-rules
     // https://mrmans0n.github.io/compose-rules/ktlint/
-    detektPlugins("io.nlopez.compose.rules:detekt:0.5.3") // Use the latest version
-    detektPlugins("dev.detekt:detekt-rules-ktlint-wrapper:2.0.0-alpha.1")
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.6")
+    detektPlugins("io.nlopez.compose.rules:detekt:0.5.6") // Use the latest version
+    detektPlugins("dev.detekt:detekt-rules-ktlint-wrapper:2.0.0-alpha.2")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.8")
 
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter)
-    testImplementation("io.mockk:mockk:1.14.7")
+    testImplementation("io.mockk:mockk:1.14.9")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
-    androidTestImplementation("io.mockk:mockk-android:1.14.7")
+    androidTestImplementation("io.mockk:mockk-android:1.14.9")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-    androidTestImplementation("androidx.navigation:navigation-testing:2.9.6")
+    androidTestImplementation("androidx.navigation:navigation-testing:2.9.7")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
