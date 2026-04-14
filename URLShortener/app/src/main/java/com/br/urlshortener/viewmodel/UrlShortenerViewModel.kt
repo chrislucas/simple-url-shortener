@@ -7,11 +7,11 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.br.urlshortener.BuildConfig
 import com.br.urlshortener.HttpClient
 import com.br.urlshortener.data.remote.UrlShortenerClient
+import com.br.urlshortener.data.remote.repository.UrlShortenerRepositoryDefault
 import com.br.urlshortener.domain.model.UrlResult
 import com.br.urlshortener.domain.model.UrlShortener
 import com.br.urlshortener.domain.repository.RepositoryResult
 import com.br.urlshortener.domain.repository.UrlShortenerRepository
-import com.br.urlshortener.domain.repository.UrlShortenerRepositoryDefault
 import com.br.urlshortener.ui.event.UrlShortenerEvent
 import com.br.urlshortener.ui.event.UrlShortenerUIEvent
 import com.br.urlshortener.ui.state.UrlShortenerUIState
@@ -141,8 +141,8 @@ class UrlShortenerViewModel(
             initializer {
                 val httpClientBuilder = HttpClient.Builder(BuildConfig.BASE_URL)
                 val httpClient = httpClientBuilder
-                    .withConnectionTimeout(20L)
-                    .withReadTimeout(20L)
+                    .withConnectionTimeout(60L)
+                    .withReadTimeout(60L)
                     .isDebugMode(BuildConfig.DEBUG)
                     .build()
                 val client = httpClient.createService(UrlShortenerClient::class)

@@ -4,7 +4,7 @@
 
 1. [Avaliação da Arquitetura](#1-avaliação-da-arquitetura)
 2. [Padrões de Projeto Identificados](#2-padrões-de-projeto-identificados)
-3. [Avaliação de Componentes (ViewModel, Repository, HttpClient, SafeRepository)](#3-avaliação-de-componentes-viewmodel-repository-httpclient-saferepository)
+3. [Avaliação de Componentes (ViewModel, Repository, HttpClient, SafeRepository, UI)](#3-avaliação-de-componentes-viewmodel-repository-httpclient-saferepository)
 4. [Múltiplos StateFlows, alternativas e MutableStateFlow vs StateFlow](#4-múltiplos-stateflows-alternativas-e-mutablestateflow-vs-stateflow)
 5. [Refatoração: modelo único de estado (UrlShortenerViewModel)](#5-refatoração-modelo-único-de-estado-urlshortenerviewmodel)
 6. [Value Class e Algoritmo de Hash](#6-value-class-e-algoritmo-de-hash)
@@ -15,6 +15,9 @@
 11. [Plano de Refatoração Geral](#11-plano-de-refatoração-geral)
 12. [Reavaliação do Código (Atualização)](#12-reavaliação-do-código-atualização)
 13. [Nota final do código (0–10)](#13-nota-final-do-código-010)
+14. [Avaliação da qualidade da implementação de navegação](#14-avaliação-da-qualidade-da-implementação-de-navegação)
+15. [UrlShortenerScreen, uiState e visibilidade de componentes](#15-urlshortenerscreen-uistate-e-visibilidade-de-componentes)
+16. [Qualidade dos testes, lacunas e plano de testes no refactoring](#16-qualidade-dos-testes-lacunas-e-plano-de-testes-no-refactoring)
 
 ---
 
@@ -70,16 +73,19 @@ O projeto utiliza a arquitetura **MVVM** com Jetpack Compose, organizada em cama
 
 ### 2.1 Repository Pattern
 
-**Localização**: `domain.repository.UrlShortenerRepository` e `UrlShortenerRepositoryDefault`
+**Localização**: interface em `domain.repository.UrlShortenerRepository`; implementação em `data.remote.repository.UrlShortenerRepositoryDefault`
 
 **Descrição**: abstração da fonte de dados (API REST) atrás de uma interface.
 
 ```kotlin
-// UrlShortenerRepository.kt
+// domain/repository/UrlShortenerRepository.kt — package com.br.urlshortener.domain.repository
 interface UrlShortenerRepository {
     suspend fun postUrl(urlShortener: UrlShortener): RepositoryResult<UrlResult>
     suspend fun getUrlShortener(id: String): RepositoryResult<UrlShortener>
 }
+
+// Implementação: data/remote/repository/UrlShortenerRepositoryDefault.kt
+// class UrlShortenerRepositoryDefault(private val client: UrlShortenerClient) : UrlShortenerRepository
 ```
 
 **Uso**: O ViewModel depende da interface, permitindo testes com implementações mock.
@@ -93,16 +99,20 @@ interface UrlShortenerRepository {
 **Descrição**: criação do ViewModel com suas dependências (Client, Repository) encapsulada.
 
 ```kotlin
-val FACTORY = viewModelFactory {
-    initializer {
-        val httpClient = HttpClient.Builder(BuildConfig.BASE_URL)
-            .withConnectionTimeout(20L)
-            .withReadTimeout(20L)
-            .isDebugMode(BuildConfig.DEBUG)
-            .build()
-        val client = httpClient.createService(UrlShortenerClient::class)
-        val repository = UrlShortenerRepositoryDefault(client)
-        UrlShortenerViewModel(repository)
+// viewmodel/UrlShortenerViewModel.kt — imports omitidos (BuildConfig, HttpClient, UrlShortenerClient, UrlShortenerRepositoryDefault)
+companion object {
+    val FACTORY = viewModelFactory {
+        initializer {
+            val httpClientBuilder = HttpClient.Builder(BuildConfig.BASE_URL)
+            val httpClient = httpClientBuilder
+                .withConnectionTimeout(20L)
+                .withReadTimeout(20L)
+                .isDebugMode(BuildConfig.DEBUG)
+                .build()
+            val client = httpClient.createService(UrlShortenerClient::class)
+            val repository = UrlShortenerRepositoryDefault(client) // data.remote.repository
+            UrlShortenerViewModel(repository)
+        }
     }
 }
 ```
@@ -118,13 +128,25 @@ val FACTORY = viewModelFactory {
 **Descrição**: construção configurável do cliente HTTP (OkHttp + Retrofit) via Builder pattern.
 
 ```kotlin
-class HttpClient private constructor(...) {
-    class Builder(...) {
+// HttpClient.kt — package com.br.urlshortener
+class HttpClient private constructor(
+    private val url: String,
+    private val converterFactory: Converter.Factory = GsonConverterFactory.create(),
+    private val isDebug: Boolean,
+    private val connectTimeoutInSeconds: Long = 30L,
+    private val readTimeoutInSeconds: Long = 30L,
+) {
+    class Builder(
+        private var url: String,
+        /* converterFactory, isDebugMode, timeouts com defaults */
+    ) {
+        fun isDebugMode(isDebug: Boolean): Builder
         fun withConnectionTimeout(seconds: Long): Builder
         fun withReadTimeout(seconds: Long): Builder
-        fun isDebugMode(isDebug: Boolean): Builder
+        fun withConverterFactory(converterFactory: Converter.Factory): Builder
         fun build(): HttpClient
     }
+
     fun <T : Any> createService(serviceClass: KClass<T>): T
 }
 ```
@@ -202,7 +224,7 @@ fun uiEventInterpreter(uiEvent: UrlShortenerUIEvent) {
 
 ---
 
-## 3. Avaliação de Componentes (ViewModel, Repository, HttpClient, SafeRepository)
+## 3. Avaliação de Componentes (ViewModel, Repository, HttpClient, SafeRepository, UI)
 
 ### 3.1 UrlShortenerViewModel
 
@@ -270,6 +292,21 @@ fun uiEventInterpreter(uiEvent: UrlShortenerUIEvent) {
 - **`Gson().fromJson(errorBody, String::class.java)`**: assume que o corpo de erro é JSON string; APIs frequentemente retornam `{"message":"..."}` ou `{"error":"..."}` — usar DTO de erro ou `JsonObject`/`JsonParser` para extrair mensagem com segurança
 - **`empty_message` como string**: se `errorBody` for vazio, o Gson pode falhar — tratar `null`/string vazia antes do parse
 - **Centralizar mensagens**: constantes ou resource strings para textos genéricos ("null_body", etc.)
+
+---
+
+### 3.5 Componentes de UI (Compose)
+
+#### Pontos positivos
+
+- **`UrlShortenerScreen`** (`ShortenerUrlScreen.kt`): separa overlays (`LoadingOverlayComponent`, `OverlayErrorComponent`) do formulário; usa `UrlShortenerForm` com lista e campo.
+- **Componentes reutilizáveis**: `UrlShortenerFormComponent`, `UrlShortenerListComponent` (apresentacional: `urls` + `onClickItem`), tema Material 3.
+- **Previews**: `UrlShortenerFormPreview` com repositório fake para desenvolvimento visual.
+
+#### Pontos de melhoria
+
+- Visibilidade condicional ainda fragmentada entre `uiState` e fluxos paralelos — ver [secção 15](#15-urlshortenerscreen-uistate-e-visibilidade-de-componentes).
+- Label **"Shorted URL"** no `UrlShortenerListComponent` permanece gramaticalmente fraco (já identificado na secção 8).
 
 ---
 
@@ -433,12 +470,27 @@ fun shortenerUrlMurmur(url: String): String {
 
 O projeto já utiliza Navigation Compose. O plano abaixo amplia e organiza melhor o uso do Navigation Component.
 
+### 7.0 Qualidade da implementação atual (antes do plano de evolução)
+
+**O que está sólido**
+
+- **Grafo declarativo**: `NavHost` com três destinos (`SplashScreenRoute`, `ShortenerUrlScreenRoute`, `UrlDetailScreenRoute`) e `startDestination` explícito.
+- **Barra superior**: `TopAppBar` com título por rota (`NavRoute` + `stringResource`) e botão voltar condicionado a `previousBackStackEntry`.
+- **Efeitos de navegação**: `LaunchedEffect(Unit)` em `UrlShortenerApp` consome `navigationEvent` uma vez por evento — adequado para Snackbar e navegação pós-sucesso do fetch.
+- **`popBackStack` alvo**: `backToShortenerUrlScreen` usa `popBackStack(route, inclusive = false)` para voltar à lista de forma previsível.
+
+**Limitações (alinham-se à secção 7.2)**
+
+- **Estado de detalhe fora da rota**: `UrlDetailScreen` depende de `urlShortener` no ViewModel partilhado, não de argumentos `NavType` — restauração e deep links continuam frágeis.
+- **Rotas como `enum.name`**: simples e legível, mas sem validação de argumentos em tempo de compilação.
+- **Acoplamento lista ↔ detalhe**: um único `UrlShortenerViewModel` no `UrlShortenerApp` mantém lista, texto e detalhe — escopo maior do que o ecrã único.
+
 ### 7.1 Estado Atual
 
-- `NavRoute` enum com rotas: Splash, ShortenerUrl, UrlDetail
-- `NavHost` em `UrlShortenerApp` com `composable()` para cada rota
-- ViewModel compartilhado entre `ShortenerUrlScreen` e `UrlDetailScreen`
-- Parâmetros de navegação: nenhum (dado passa pelo `urlShortener` do ViewModel)
+- `NavRoute` (`ui.screen.UrlShortenerApp`) é um `enum` cujos nomes são as rotas: `SplashScreenRoute`, `ShortenerUrlScreenRoute`, `UrlDetailScreenRoute` (cada um com `@StringRes val title`).
+- `NavHost` em `UrlShortenerApp` com `composable(route = NavRoute.<...>.name)` para cada destino.
+- ViewModel partilhado: `UrlShortenerViewModel` no `UrlShortenerApp`; `UrlShortenerScreen` está em `ShortenerUrlScreen.kt` (composable `UrlShortenerScreen`).
+- Parâmetros de navegação: nenhum — o detalhe usa `urlShortener` do ViewModel e `UrlDetailScreen(url = it.url, ...)`.
 
 ### 7.2 Problemas Identificados
 
@@ -454,34 +506,39 @@ O projeto já utiliza Navigation Compose. O plano abaixo amplia e organiza melho
 
 **Passos**:
 
-1. Definir rotas com argumentos:
+1. **Referência ao código atual** (rotas sem argumentos):
 
 ```kotlin
-// Exemplo com typed navigation (Kotlin DSL ou navigation-compose)
-sealed class NavRoute {
-    data object Splash : NavRoute()
-    data object ShortenerList : NavRoute()
-    data class UrlDetail(val id: String) : NavRoute()
+// UrlShortenerApp.kt — package com.br.urlshortener.ui.screen
+enum class NavRoute(@field:StringRes val title: Int) {
+    SplashScreenRoute(title = R.string.app_name),
+    ShortenerUrlScreenRoute(title = R.string.list_shortener_url),
+    UrlDetailScreenRoute(title = R.string.shortener_url_detail),
 }
 ```
 
-1. Configurar `NavHost` com argumentos:
+2. **Alvo sugerido**: evoluir o destino de detalhe para incluir `urlId` (o projeto usa `enum.name` como `String` de rota). Exemplo alinhado aos nomes reais e à assinatura atual `UrlDetailScreen(url: String, onBackPressed: () -> Unit)`:
 
 ```kotlin
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+
 composable(
-    route = "detail/{urlId}",
+    route = "${NavRoute.UrlDetailScreenRoute.name}/{urlId}",
     arguments = listOf(navArgument("urlId") { type = NavType.StringType })
 ) { backStackEntry ->
     val urlId = backStackEntry.arguments?.getString("urlId") ?: return@composable
-    UrlDetailScreen(urlId = urlId, viewModel = viewModel)
+    // Ex.: UrlDetailViewModel(urlId) + repositório; depois UrlDetailScreen(url = resolvedUrl, onBackPressed = ...)
 }
 ```
 
-1. Navegar com parâmetro:
+3. Navegar após obter o `alias` (ex.: a partir de `UrlResult`):
 
 ```kotlin
-navController.navigate("detail/${urlResult.alias}")
+navController.navigate("${NavRoute.UrlDetailScreenRoute.name}/${urlResult.alias}")
 ```
+
+Alternativa de modelagem (ilustrativa — **não** é o código atual): `sealed class` de rotas ou Navigation Compose com tipo gerado.
 
 #### Fase 2: ViewModels por destino (opcional)
 
@@ -512,11 +569,14 @@ navController.navigate("detail/${urlResult.alias}")
 1. Definir `enterTransition` e `exitTransition` para cada `composable()`:
 
 ```kotlin
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+
 composable(
-    route = "detail/{urlId}",
+    route = "${NavRoute.UrlDetailScreenRoute.name}/{urlId}",
     enterTransition = { slideInHorizontally { it } },
     exitTransition = { slideOutHorizontally { -it } }
-) { ... }
+) { /* ... */ }
 ```
 
 1. Avaliar `AnimatedContent` ou transições compartilhadas para cases específicos.
@@ -530,10 +590,12 @@ composable(
 1. Declarar deep link no `composable()`:
 
 ```kotlin
+import androidx.navigation.navDeepLink
+
 composable(
-    route = "detail/{urlId}",
+    route = "${NavRoute.UrlDetailScreenRoute.name}/{urlId}",
     deepLinks = listOf(navDeepLink { uriPattern = "myapp://url/{urlId}" })
-) { ... }
+) { /* ... */ }
 ```
 
 1. Configurar intent filters no `AndroidManifest` se necessário.
@@ -565,7 +627,7 @@ O componente foi **refatorado** conforme as recomendações:
 
 ### 8.2 Pontos de atenção
 
-1. **Orquestração na tela**: O callback `{ pathId -> interpreter(GetShortUrlEvent(pathId)); onClickItem() }` chama `interpreter` (assíncrono) e `onClickItem` (navega) imediatamente — a navegação ocorre antes do fetch completar. O detalhe pode exibir estado vazio brevemente até `urlShortener` ser atualizado. **Sugestão**: Navegar com `urlId` na rota e deixar o detalhe buscar os dados; ou usar evento one-shot para navegar apenas após sucesso.
+1. **Orquestração**: O fluxo atual chama apenas `uiEventInterpreter(GetShortUrlEvent)` no clique; a navegação ocorre **após** sucesso do repositório via `UrlShortenerEvent.NavigateToDetail`, com `urlShortener` já atualizado — o problema de “navegar antes do fetch” descrito em versões anteriores do relatório **deixou de se aplicar** a este callback. Persiste, no entanto, o risco de **estado de detalhe só na memória do ViewModel** (sem argumento de rota), tema das secções 7 e 14.
 2. **Typo "Shorted"**: Considerar "Short URL" em vez de "Shorted URL" (gramática).
 
 ### 8.3 Referência (implementação atual)
@@ -611,14 +673,14 @@ A decisão de navegar deve ficar na **tela** ou em um **evento do ViewModel**:
 UrlShortenerListComponent(
     urls = urls,
     onItemClick = { alias ->
-        viewModel.interpreter(UrlShortenerUIEvent.GetShortUrlEvent(alias))
-        // Navegação via evento one-shot do ViewModel, ou:
-        navController.navigate("detail/$alias")
+        viewModel.uiEventInterpreter(UrlShortenerUIEvent.GetShortUrlEvent(alias))
+        // Navegação via evento one-shot do ViewModel, ou (após Fase 1 da secção 7):
+        // navController.navigate("${NavRoute.UrlDetailScreenRoute.name}/$alias")
     }
 )
 ```
 
-Se usar parâmetros na rota (seção 7), a navegação pode ser direta: `navController.navigate("detail/$alias")`, e o `UrlDetailScreen` busca os dados via `urlId`.
+Se usar parâmetros na rota (secção 7), a navegação pode ser direta: `navController.navigate("${NavRoute.UrlDetailScreenRoute.name}/$alias")`, e o detalhe resolve dados pelo `urlId` (ex.: `UrlDetailViewModel`).
 
 #### Estrutura sugerida final
 
@@ -695,15 +757,13 @@ fun UrlShortenerListComponent(
 
 ---
 
-### 10.2 Estado e eventos misturados
+### 10.2 Estado e eventos misturados *(parcialmente resolvido)*
 
-**Problema**: Navegação e mensagens efêmeras (ex.: Snackbar) tratadas como estado persistente.
+**Situação atual**: O projeto já separa **estado reativo** (`StateFlow` / `UrlShortenerUIState`) de **efeitos one-shot** via `SharedFlow<UrlShortenerEvent>` (`NavigateToDetail`, `ShowSnackBar`, `ShowError`), consumido em `LaunchedEffect` em `UrlShortenerApp`. Isto endereça o problema descrito nas versões anteriores do relatório.
 
-**Como resolver**:
-- Criar um canal de **eventos one-shot** com `SharedFlow(replay = 0)` ou `Channel`.
-- Definir `sealed class UrlShortenerEvent` com variantes como `NavigateToDetail(id)`, `ShowSnackbar(message)`, `ShowError(message)`.
-- O ViewModel emite eventos; a UI coleta com `collectAsState` ou `LaunchedEffect` e consome uma vez (não reexibe).
-- Após consumir, não é necessário `putUiOnIdle()` — o estado de sucesso/erro não precisa persistir para efeitos colaterais.
+**O que ainda pode melhorar**:
+- **`putUiOnIdle()`** continua necessário ao sair do detalhe para limpar `urlShortener` e `uiState` — coerente com estado partilhado, mas poderia desaparecer com argumentos de rota + `ViewModel` de detalhe.
+- Mensagens de erro ainda passam por **Snackbar** e, em fluxos inválidos de URL, também por overlay na lista — dupla superfície (aceitável, mas documentar o contrato).
 
 ---
 
@@ -724,21 +784,18 @@ fun UrlShortenerListComponent(
 **Problema**: Dado do detalhe não está na rota; perda de estado em rotação/restore.
 
 **Como resolver**:
-- Definir rota com argumento: `"detail/{urlId}"` e `navArgument("urlId") { type = NavType.StringType }`.
-- Navegar com `navController.navigate("detail/${urlResult.alias}")` ao clicar no item.
+- Definir rota com argumento, alinhada ao `NavRoute` existente: `"${NavRoute.UrlDetailScreenRoute.name}/{urlId}"` e `navArgument("urlId") { type = NavType.StringType }`.
+- Navegar com `navController.navigate("${NavRoute.UrlDetailScreenRoute.name}/${urlResult.alias}")` ao clicar no item (quando o fluxo não usar só o ViewModel).
 - No `composable` do detalhe, obter `urlId` de `backStackEntry.arguments?.getString("urlId")`.
 - O `UrlDetailViewModel` usa `SavedStateHandle.get<String>("urlId")` para restaurar após rotação/process death.
 
 ---
 
-### 10.5 Código morto
+### 10.5 Código morto *(verificado no código atual)*
 
-**Problema**: `SafeRequest` e `OperationResult` não utilizados (ou substituídos por `SafeRepository`/`RepositoryResult`).
+**Situação**: Não há referências a `SafeRequest` ou `OperationResult` no projeto — o fluxo consolidou-se em `SafeRepository` e `RepositoryResult`.
 
-**Como resolver**:
-- Se `SafeRepository` e `RepositoryResult` já cobrem o caso: **remover** `SafeRequest` e `OperationResult` para evitar confusão.
-- Se ainda houver uso planejado: documentar o propósito ou integrar ao fluxo existente.
-- Executar busca por referências; remover arquivos ou classes não referenciadas.
+**Como resolver** (se reintroduzir código legado no futuro): manter uma única abstração de resultado de rede e evitar classes paralelas não usadas.
 
 ---
 
@@ -754,17 +811,15 @@ fun UrlShortenerListComponent(
 
 **Problema** (anterior): `onClickItem()` chamado dentro de `when (uiState)` em `Success<UrlShortener>`, disparando navegação em contextos indevidos.
 
-**Status**: Refatorado para componente apresentacional com `urls` e `onItemClick`. Resta ajustar a orquestração (navegação antes do fetch) — ver seção 8.2.
+**Status**: Refatorado para componente apresentacional com `urls` e `onClickItem`. A navegação para o detalhe ocorre após sucesso do repositório via evento one-shot — ver secção 8.2.
 
 ---
 
-### 10.8 Typos
+### 10.8 Typos *(resolvido no `UrlShortenerViewModel`)*
 
-**Problema**: `mutableUiSate` (deveria ser `mutableUiState`), comentário "DO NOTHINH".
+**Situação atual**: O campo privado está corretamente nomeado `mutableUiState`; o comentário incorreto não consta no ficheiro atual.
 
-**Como resolver**:
-- Renomear `mutableUiSate` para `mutableUiState` em todo o ViewModel (refactor do IDE).
-- Remover ou corrigir o comentário "DO NOTHINH"; se o bloco `else` for vazio, removê-lo ou documentar o motivo.
+**Atenção nova (manutenção)**: Existem **dois imports de `delay`** em `UrlShortenerViewModel` (`kotlinx.coroutines.delay` e `kotlinx.coroutines.time.delay`) — risco de ambiguidade ou uso involuntário da API errada; convém manter apenas o necessário para corrotinas.
 
 ---
 
@@ -779,16 +834,20 @@ fun UrlShortenerListComponent(
 
 ---
 
-### 10.10 Testes
+### 10.10 Testes *(evolução desde a última revisão)*
 
-**Problema**: Pouca evidência de testes unitários ou de UI para ViewModel e fluxos principais.
+**O que já existe**
 
-**Como resolver**:
-- **ViewModel**: testes com `runTest`, `StateFlow` (ex.: `turbine` ou `first()`), e Repository mockado.
-- **Repository**: testes com `UrlShortenerClient` mockado (MockK) e respostas de sucesso/erro.
-- **Componentes**: testes de Compose com `composeTestRule` para interações e estado exibido.
-- **Navegação**: usar `TestNavHostController` para validar rotas e argumentos.
-- Configurar cobertura mínima no JaCoCo e integrar ao pipeline de CI.
+- **Unitários (`app/src/test`)**: `UrlShortenerViewModelTest` (cenários de post, get, URLs inválidas, concorrência, `putUiOnIdle`), `UrlShortenerUIStateTest`, `UrlShortenerTest`, `HttpClientTest` — cobertura substantiva do ViewModel e do modelo.
+- **Instrumentados (`app/src/androidTest`)**: `UrlShortenerScreenTest` (estados Idle/Loading/Error/Success), testes de `SplashScreen`, `LoadingOverlayComponent`, `ErrorOverlayComponent`, `UrlShortenerListComponent`.
+
+**Lacunas relevantes**
+
+- **Integração do repositório / cliente HTTP** sem rede real (MockK apenas no ViewModel).
+- **`UrlShortenerApp` / Navigation**: ausência de testes com `TestNavHostController` ou robolectric para fluxos de navegação e argumentos.
+- **Regressão do import duplicado de `delay`** e exceções não tratadas no `postUrl` (teste `expected = RuntimeException`) — indicam necessidade de política clara de erros.
+
+**Como evoluir**: ver [secção 16](#16-qualidade-dos-testes-lacunas-e-plano-de-testes-no-refactoring).
 
 ---
 
@@ -799,10 +858,11 @@ fun UrlShortenerListComponent(
 1. ~~Refatorar `UrlShortenerListComponent`~~ *(concluído)*
 2. ~~Padronizar estado em `StateFlow`~~ *(concluído)*
 3. ~~Remover código deprecado da `MainActivity`~~ *(concluído)*
-4. Corrigir `getUrlShortener`: usar `result.data` em vez de `urlShortener.value`.
-5. Corrigir typo `mutableUiSate` → `mutableUiState`.
-6. Passar `id` como parâmetro de rota para o detalhe.
+4. ~~Corrigir `getUrlShortener` para usar `result.data`~~ *(concluído — `mutableUrlShortener.update { result.data }`)*
+5. ~~Corrigir typo `mutableUiSate` → `mutableUiState`~~ *(concluído)*
+6. Passar `id` como parâmetro de rota para o detalhe (ainda pendente).
 7. ~~Implementar one-shot events para navegação~~ *(implementado — `UrlShortenerEvent` + `navigationEvent`)*
+8. Eliminar import redundante ou ambíguo de `delay` no `UrlShortenerViewModel` (revisão de código).
 
 ### 11.2 Médio prazo (2–4 sprints)
 
@@ -840,11 +900,13 @@ Esta seção apresenta a avaliação completa atual do código, seguindo os mesm
 
 | Área | Situação | Observação |
 |------|----------|------------|
-| **ViewModel** | `getUrlShortener`: `Success(urlShortener.value)` | ⚠️ Preferir `result.data` — `urlShortener` é o StateFlow exposto; usar `mutableUrlShortener.value` ou `result.data` |
-| **ViewModel** | Typo `mutableUiSate` | ⚠️ Renomear para `mutableUiState` |
-| **Navegação** | Parâmetros não passados na rota | ⚠️ `urlId` não está na URL; dados via ViewModel; perda de estado em rotação |
-| **Orquestração** | Navegação imediata no clique | ⚠️ `onClickItem()` chamado antes do fetch; detalhe pode exibir vazio brevemente |
+| **ViewModel** | `getUrlShortener` atualiza com `result.data` | ✅ Alinhado com o fluxo atual |
+| **ViewModel** | Nome `mutableUiState` | ✅ Typo histórico corrigido |
+| **ViewModel** | Dois imports `delay` | ⚠️ Revisar para evitar ambiguidade |
+| **Navegação** | Parâmetros não passados na rota | ⚠️ `urlId` não está na URL; dados via ViewModel; restauração limitada |
+| **Orquestração** | Navegação após sucesso via `NavigateToDetail` | ✅ Lista não chama `navigate` diretamente; detalhe depende ainda do estado no VM até haver argumentos na rota |
 | **SafeRepository** | `Gson().fromJson(errorBody, String::class.java)` | ⚠️ Pode falhar se API retornar JSON objeto |
+| **Pacotes** | `UrlShortenerRepositoryDefault` em `data.remote.repository` | ℹ️ Implementação deslocada da pasta `domain` — coerente com camada de dados |
 
 ### 12.3 Avaliação por Critério
 
@@ -855,60 +917,58 @@ Esta seção apresenta a avaliação completa atual do código, seguindo os mesm
 | **Tratamento de erros** | 8/10 | RepositoryResult e SafeRepository bem implementados |
 | **Consistência de estado** | 8/10 | StateFlow padronizado; `urls` como Set; sem putUiOnIdle incorreto |
 | **Componentização** | 8/10 | UrlShortenerListComponent apresentacional; orquestração pode melhorar |
-| **Navegação** | 5,5/10 | Sem parâmetros na rota; dados via ViewModel; race no clique |
-| **Testabilidade** | 6,5/10 | Repository e HttpClient testáveis; ViewModel acoplado à factory |
+| **Navegação** | 6/10 | Sem parâmetros na rota; eventos one-shot bem aplicados; estado de detalhe ainda no VM partilhado |
+| **Testabilidade** | 7/10 | Bons testes de ViewModel e vários instrumentados; factory manual e lacunas em navegação/repositório integrado |
 
-### 12.4 Nota consolidada (histórico): **7,2 / 10**
+### 12.4 Nota consolidada (histórico): **7,2 / 10** → **revisão 2026: ~7,5 / 10**
 
-**Evolução**: 6,5 → 7,2 (melhoria de +0,7)
-
-As mudanças estão **no caminho correto**. A refatoração do `UrlShortenerListComponent`, a remoção do bug de `putUiOnIdle`, a limpeza do `MainActivity` e a padronização em `StateFlow` elevam a qualidade. Os próximos passos focam em navegação com parâmetros na rota e eventos one-shot.
+**Evolução**: 6,5 → 7,2 (melhoria de +0,7) com refatorações de lista, `MainActivity` e `StateFlow`. **Revisão abril/2026**: correções no ViewModel (nome do estado, atribuição em `getUrlShortener`), testes de ViewModel mais completos e implementação estável de `UrlShortenerEvent` justificam **aproximar a nota consolidada da secção 13 (~7,5)**.
 
 ### 12.5 Plano de Refatoração Atualizado (Priorizado)
 
 #### Prioridade 1 — Crítico (1–2 dias)
 
-1. **Corrigir `getUrlShortener`**: Usar `UrlShortenerUIState.Success(result.data)` em vez de `urlShortener.value`.
-2. **Corrigir typo**: `mutableUiSate` → `mutableUiState`.
+1. ~~**Corrigir `getUrlShortener`**~~ *(feito)*.
+2. ~~**Typo `mutableUiState`**~~ *(feito)*.
+3. **Imports de `delay`**: manter um único import adequado ao uso real em `postUrl`.
 
 #### Prioridade 2 — Alta (3–5 dias)
 
-3. **Passar `urlId` como parâmetro de rota**: `"detail/{urlId}"`; navegar com `navController.navigate("detail/$alias")`.
-4. **Criar `UrlDetailViewModel`** com `SavedStateHandle` para buscar dados por `urlId`; eliminar dependência do ViewModel compartilhado e race no clique.
-5. **Revisar `SafeRepository`**: Tratar `errorBody` como JSON objeto quando aplicável.
+4. **Passar `urlId` como parâmetro de rota**: `"${NavRoute.UrlDetailScreenRoute.name}/{urlId}"`; navegar com `navController.navigate("${NavRoute.UrlDetailScreenRoute.name}/$alias")` ou API tipada.
+5. **Criar `UrlDetailViewModel`** com `SavedStateHandle` para buscar dados por `urlId`; reduzir dependência do ViewModel partilhado.
+6. **Revisar `SafeRepository`**: Tratar `errorBody` como JSON objeto quando aplicável.
 
 #### Prioridade 3 — Média (1–2 semanas)
 
-6. **Implementar eventos one-shot** para navegação (SharedFlow/Channel).
-7. **Corrigir "Shorted"** → "Short" em `UrlShortenerListComponent`.
+7. ~~**Eventos one-shot**~~ *(já existem — `navigationEvent`)*.
+8. **Corrigir "Shorted"** → "Short" (ou "Short URL") em `UrlShortenerListComponent`.
 
 #### Prioridade 4 — Baixa
 
-8. Introduzir Hilt/Koin para DI.
-9. Aplicar `Loading` apenas em `PostShortUrlEvent` (opcional).
-10. Implementar testes unitários e de UI.
+9. Introduzir Hilt/Koin para DI.
+10. Ampliar testes de navegação e integração (ver secção 16).
 
 ---
 
 ## 13. Nota final do código (0–10)
 
-### Nota: **7,5 / 10**
+### Nota: **7,5 / 10** *(revisão abril/2026)*
 
 | Critério | Nota | Comentário breve |
 |----------|------|-------------------|
-| Arquitetura MVVM e camadas | 8/10 | Separação clara; falta DI e ViewModel dedicado ao detalhe |
+| Arquitetura MVVM e camadas | 8/10 | Separação clara; implementação do repositório em `data`; falta DI e ViewModel dedicado ao detalhe |
 | Padrões (Repository, Builder, sealed, value class, eventos) | 8/10 | Uso consistente; `SafeRepository` centraliza rede |
-| UrlShortenerViewModel | 7/10 | Vários `StateFlow` + `SharedFlow`; `uiEventInterpreter` e eventos one-shot bem encaminhados; ainda há espaço para estado unificado |
+| UrlShortenerViewModel | 7/10 | Vários `StateFlow` + `SharedFlow`; `uiEventInterpreter` e eventos one-shot maduros; pequeno débito (imports `delay`) |
 | Dados e rede | 8/10 | `RepositoryResult`, timeouts no `HttpClient`; parsing de erro HTTP frágil |
-| UI Compose | 7,5/10 | Lista apresentacional; Snackbar + navegação por eventos |
-| Navegação | 6/10 | Sem argumentos na rota; estado de detalhe no ViewModel compartilhado |
-| Testes e manutenção | 5,5/10 | Pouca cobertura aparente; factory manual |
+| UI Compose | 7,5/10 | Lista apresentacional; overlays por `uiState`; ver secção 15 |
+| Navegação | 6/10 | Eventos one-shot corretos; ainda sem argumentos na rota; detalhe via estado partilhado |
+| Testes e manutenção | 7/10 | Bateria sólida de testes de ViewModel e vários UI tests; faltam navegação integrada e testes de repositório com rede |
 
 ### Justificativa
 
-O projeto está **acima da média** para um app de porte reduzido: MVVM coerente, Compose, Navigation, tratamento de resultado de rede tipado, `HttpClient` configurável, `SafeRepository` reutilizável e evolução recente com **eventos one-shot** (`UrlShortenerEvent` + `SharedFlow`), o que endereça parte do acoplamento navegação/estado.
+O projeto está **acima da média** para um app de porte reduzido: MVVM coerente, Compose, Navigation, tratamento de resultado de rede tipado, `HttpClient` configurável, `SafeRepository` reutilizável e **eventos one-shot** (`UrlShortenerEvent` + `SharedFlow`) bem integrados à UI.
 
-A nota não chega a **8–9** porque ainda há **múltiplos fluxos de estado** sem modelo único, **navegação sem parâmetros na rota**, **ViewModel compartilhado** entre telas, **sem framework de DI**, **testes pouco visíveis** e **melhorias pendentes** em `SafeRepository` (corpo de erro JSON) e no domínio `UrlShortener` (hash local vs API).
+A nota não chega a **8–9** porque ainda há **múltiplos fluxos de estado** sem modelo único, **navegação sem parâmetros na rota**, **ViewModel partilhado** entre lista e detalhe, **sem framework de DI**, lacunas em **testes de navegação/integração** e **melhorias pendentes** em `SafeRepository` (corpo de erro JSON) e no domínio `UrlShortener` (hash local vs API).
 
 ### Evolução sugerida para subir a nota
 
@@ -918,4 +978,66 @@ A nota não chega a **8–9** porque ainda há **múltiplos fluxos de estado** s
 
 ---
 
-*Relatório gerado em março de 2025. Atualizado com arquitetura, componentes (incl. SafeRepository), múltiplos StateFlows, modelo único proposto, value class, nota 7,5/10.*
+## 14. Avaliação da qualidade da implementação de navegação
+
+Esta secção consolida o julgamento sobre **Navigation Compose** no estado atual; o plano de evolução continua na [secção 7](#7-plano-de-refatoração-com-navigation-component) e em [7.0](#70-qualidade-da-implementação-atual-antes-do-plano-de-evolução).
+
+**Pontos fortes**
+
+- Separação entre **efeitos** (`SharedFlow` → `LaunchedEffect`) e **estado de ecrã** (`StateFlow`) — evita re-navegar ou re-mostrar Snackbar em recomposições.
+- **Rotas nomeadas** via `enum NavRoute` e um único `NavHost` — fácil de seguir em projeto pequeno.
+- **Voltar para a lista** com `popBackStack` explícito e `putUiOnIdle()` para alinhar estado ao sair do detalhe.
+
+**Pontos fracos**
+
+- **Sem `navArgument`**: o detalhe não recebe `urlId` pela `BackStackEntry` — o utilizador não pode partilhar um link interno nem restaurar o detalhe só com estado salvo no grafo.
+- **ViewModel ao nível do `UrlShortenerApp`**: acoplamento natural para este tamanho, mas dificulta testes isolados do grafo e clareza de ciclo de vida por destino.
+- **Tipo de rota como `String` (`enum.name`)**: suficiente hoje; escala mal sem Safe Args ou rotas seladas com parâmetros.
+
+**Síntese**: implementação **correta e idiomática para um MVP**; limitações são sobretudo de **produto e robustez** (deep links, restore), não de bugs óbvios no `NavController`.
+
+---
+
+## 15. UrlShortenerScreen, uiState e visibilidade de componentes
+
+**Implementação atual** (`ShortenerUrlScreen.kt`): o composable `UrlShortenerScreen` observa `uiState` e, num `when`, trata `Loading` com `LoadingOverlayComponent`, `Error` com `OverlayErrorComponent` (se mensagem não vazia), e **`else`** sem UI extra — `Idle` e `Success` não desencadeiam ramos dedicados na tela. A seguir, **`UrlShortenerForm`** é sempre composto (campo + lista), independentemente do `uiState`.
+
+**Observações**
+
+- O ramo **`UrlShortenerUIState.Success<T>`** existe no modelo selado, mas o **ViewModel de produção não emite `Success`** nos fluxos analisados — apenas `Idle`, `Loading` e `Error`. Testes instrumentados (`UrlShortenerScreenTest`) usam `Success` para validar que o formulário continua visível.
+- Há **duas fontes de verdade visuais**: `uiState` (overlays) e `urls` / `textFieldContent` (formulário). Para um único `collectAsState()` de ecrã, ver [secção 5](#5-refatoração-modelo-único-de-estado-urlshortenerviewmodel).
+
+**Mecanismos recomendados para mostrar/ocultar por estado**
+
+1. **Estado único de ecrã** (`data class` com `isLoading`, `errorMessage`, `urls`, etc.) + um único `collectAsState()` — o composable de topo faz `when` ou decomposição sem ambiguidade.
+2. **`Box(Modifier.fillMaxSize())`** com conteúdo base (formulário) e **overlays** empilhados com `AnimatedVisibility(visible = …)` ou `if (state.showLoading)` — garante hierarquia z-order clara (hoje overlays e form são irmãos na coluna raiz; dependendo dos componentes, pode ou não haver sobreposição total).
+3. **Derivar visibilidade**: `val showError = uiState is Error && uiState.message.isNotBlank()` — evita duplicar lógica entre ramos.
+
+---
+
+## 16. Qualidade dos testes, lacunas e plano de testes no refactoring
+
+### 16.1 O que o relatório considera “bem coberto”
+
+- **ViewModel**: cenários felizes e de erro em `postUrl` e `getUrlShortener`, URLs inválidas, concorrência, `putUiOnIdle`, recolha de `navigationEvent` com MockK.
+- **Modelo / estado**: `UrlShortenerTest`, `UrlShortenerUIStateTest`.
+- **UI instrumentada**: estados da `UrlShortenerScreen` com ViewModel mockado; componentes de lista, loading e erro.
+
+### 16.2 Lacunas típicas
+
+- **Grafo de navegação** (`UrlShortenerApp`): transições, `popBackStack`, efeitos do `LaunchedEffect` com eventos — ausentes ou mínimos.
+- **Repositório** com **Retrofit mock** ou **MockWebServer**: validar mapeamento DTO e ramos de `SafeRepository` com HTTP real simulado.
+- **`UrlShortenerUIState.Success`**: desalinhamento entre testes de UI e produção — ou passar a usar `Success` no VM ou documentar como apenas para testes.
+
+### 16.3 Plano de modificação de testes num refactoring de estado unificado
+
+Ao introduzir um único `StateFlow<UrlShortenerScreenState>` (secção 5):
+
+1. **Substituir** asserções em `textFieldContent`, `urls`, `uiState`, `urlShortener` separados por **um único snapshot** `viewModel.screenState.value` (ou `awaitItem()` com **Turbine** num único fluxo).
+2. **Atualizar mocks** em `UrlShortenerScreenTest`: hoje usam `every { viewModel.uiState } returns …` — passar a expor um único flow ou manter compatibilidade com adaptadores de leitura.
+3. **Testes de regressão**: garantir que ordem de emissão (loading → sucesso → evento de navegação) permanece observável — idealmente um teste com `advanceUntilIdle()` e fila de eventos.
+4. **JaCoCo / CI**: após refactor, reexecutar relatório de cobertura e ajustar limiares se existirem.
+
+---
+
+*Relatório gerado em março de 2025. Atualizado em abril de 2026: revisão cruzada com o código (repositório em `data.remote.repository`, ViewModel e testes), secções 7.0, 3.5, 14–16, correção de itens já resolvidos (typo, `getUrlShortener`, orquestração lista), nota e justificativa alinhadas à evidência atual.*

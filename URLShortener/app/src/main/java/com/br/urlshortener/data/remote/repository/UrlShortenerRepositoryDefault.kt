@@ -1,25 +1,27 @@
-package com.br.urlshortener.domain.repository
+package com.br.urlshortener.data.remote.repository
 
 import com.br.urlshortener.data.remote.UrlShortenerClient
 import com.br.urlshortener.data.remote.model.UrlShortenerDTO
 import com.br.urlshortener.domain.model.Link
 import com.br.urlshortener.domain.model.UrlResult
 import com.br.urlshortener.domain.model.UrlShortener
+import com.br.urlshortener.domain.repository.RepositoryResult
+import com.br.urlshortener.domain.repository.SafeRepository
+import com.br.urlshortener.domain.repository.UrlShortenerRepository
 
-class UrlShortenerRepositoryDefault(private val client: UrlShortenerClient) : UrlShortenerRepository {
+class UrlShortenerRepositoryDefault(private val client: UrlShortenerClient) :
+    UrlShortenerRepository {
 
     override suspend fun postUrl(urlShortener: UrlShortener): RepositoryResult<UrlResult> {
         val call = suspend { client.postUrl(UrlShortenerDTO(urlShortener.url)) }
         return SafeRepository.remoteCall(call) { responseBody ->
-            responseBody.let {
-                UrlResult(
-                    alias = it.alias,
-                    link = Link(
-                        self = it.link.originalUrl,
-                        short = it.link.tinyUrl
-                    )
+            UrlResult(
+                alias = responseBody.alias,
+                link = Link(
+                    self = responseBody.link.originalUrl,
+                    short = responseBody.link.tinyUrl
                 )
-            }
+            )
         }
     }
 

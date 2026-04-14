@@ -18,8 +18,8 @@ import com.br.urlshortener.domain.model.UrlResult
 import com.br.urlshortener.domain.model.UrlShortener
 import com.br.urlshortener.domain.repository.RepositoryResult
 import com.br.urlshortener.domain.repository.UrlShortenerRepository
-import com.br.urlshortener.ui.component.OverlayErrorComponent
 import com.br.urlshortener.ui.component.LoadingOverlayComponent
+import com.br.urlshortener.ui.component.OverlayErrorComponent
 import com.br.urlshortener.ui.component.UrlShortenerFormComponent
 import com.br.urlshortener.ui.component.UrlShortenerListComponent
 import com.br.urlshortener.ui.event.UrlShortenerUIEvent
