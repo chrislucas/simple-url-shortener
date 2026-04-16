@@ -13,7 +13,6 @@ import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import kotlin.reflect.KClass
 
 class HttpClientTest {
 
@@ -53,10 +52,10 @@ class HttpClientTest {
     fun `createService should build Retrofit with correct parameters`() {
         mockkConstructor(Retrofit.Builder::class)
         mockkConstructor(OkHttpClient.Builder::class)
-        
+
         val mockRetrofitBuilder = mockk<Retrofit.Builder>(relaxed = true)
         val mockOkBuilder = mockk<OkHttpClient.Builder>(relaxed = true)
-        
+
         every { anyConstructed<OkHttpClient.Builder>().connectTimeout(any(), any()) } answers {
             mockOkBuilder.connectTimeout(arg(0), arg(1))
             mockOkBuilder
@@ -68,7 +67,7 @@ class HttpClientTest {
         every { anyConstructed<OkHttpClient.Builder>().build() } answers {
             mockOkBuilder.build()
         }
-        
+
         every { anyConstructed<Retrofit.Builder>().baseUrl(any<String>()) } answers {
             mockRetrofitBuilder.baseUrl(it.invocation.args[0] as String)
             mockRetrofitBuilder
@@ -116,7 +115,7 @@ class HttpClientTest {
 
         val mockOkBuilder = mockk<OkHttpClient.Builder>(relaxed = true)
         val mockLogging = mockk<HttpLoggingInterceptor>(relaxed = true)
-        
+
         every { anyConstructed<OkHttpClient.Builder>().addInterceptor(any<Interceptor>()) } answers {
             mockOkBuilder.addInterceptor(it.invocation.args[0] as Interceptor)
             mockOkBuilder
@@ -125,7 +124,7 @@ class HttpClientTest {
             mockLogging.setLevel(it.invocation.args[0] as HttpLoggingInterceptor.Level)
             mockLogging
         }
-        
+
         // Mocking Retrofit to avoid crashes
         val mockRetrofitBuilder = mockk<Retrofit.Builder>(relaxed = true)
         every { anyConstructed<Retrofit.Builder>().baseUrl(any<String>()) } returns mockRetrofitBuilder
@@ -146,14 +145,14 @@ class HttpClientTest {
         mockkConstructor(Retrofit.Builder::class)
 
         val mockOkBuilder = mockk<OkHttpClient.Builder>(relaxed = true)
-        
+
         every { anyConstructed<OkHttpClient.Builder>().connectTimeout(any(), any()) } returns mockOkBuilder
-        
+
         every { mockOkBuilder.connectTimeout(any(), any()) } returns mockOkBuilder
         every { mockOkBuilder.readTimeout(any(), any()) } returns mockOkBuilder
         every { mockOkBuilder.addInterceptor(any<Interceptor>()) } returns mockOkBuilder
         every { mockOkBuilder.build() } returns mockk(relaxed = true)
-        
+
         val mockRetrofitBuilder = mockk<Retrofit.Builder>(relaxed = true)
         every { anyConstructed<Retrofit.Builder>().baseUrl(any<String>()) } returns mockRetrofitBuilder
 

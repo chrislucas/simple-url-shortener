@@ -16,10 +16,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.br.urlshortener.domain.model.UrlResult
 import com.br.urlshortener.domain.model.UrlShortener
-import com.br.urlshortener.domain.repository.RepositoryResult
+import com.br.urlshortener.domain.repository.BuilderRepositoryResult
 import com.br.urlshortener.domain.repository.UrlShortenerRepository
-import com.br.urlshortener.ui.component.OverlayErrorComponent
 import com.br.urlshortener.ui.component.LoadingOverlayComponent
+import com.br.urlshortener.ui.component.OverlayErrorComponent
 import com.br.urlshortener.ui.component.UrlShortenerFormComponent
 import com.br.urlshortener.ui.component.UrlShortenerListComponent
 import com.br.urlshortener.ui.event.UrlShortenerUIEvent
@@ -87,11 +87,11 @@ private fun UrlShortenerFormPreview() {
         UrlShortenerViewModel(
             repository = object : UrlShortenerRepository {
 
-                override suspend fun postUrl(urlShortener: UrlShortener): RepositoryResult<UrlResult> =
-                    RepositoryResult.onError("Any Error")
+                override suspend fun postUrl(urlShortener: UrlShortener): BuilderRepositoryResult<UrlResult> =
+                    BuilderRepositoryResult.onError("Any Error")
 
-                override suspend fun getUrlShortener(id: String): RepositoryResult<UrlShortener> =
-                    RepositoryResult.onError("Any Error")
+                override suspend fun getUrlShortener(id: String): BuilderRepositoryResult<UrlShortener> =
+                    BuilderRepositoryResult.onError("Any Error")
             }
         )
     }

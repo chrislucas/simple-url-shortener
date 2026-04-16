@@ -1,0 +1,61 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:ErrorOverlayMessage.kt$@Composable fun ErrorComponent(modifier: Modifier, message: String = "Android")</ID>
+    <ID>CyclomaticComplexMethod:ErrorOverlayMessage.kt$@Preview(showBackground = true) @Composable fun ErrorComponentPreview()</ID>
+    <ID>CyclomaticComplexMethod:ErrorOverlayMessage.kt$@Preview(showBackground = true, showSystemUi = true) @Composable fun OverlayErrorComponent(message: String = "Android")</ID>
+    <ID>CyclomaticComplexMethod:HttpClient.kt$HttpClient$fun &lt;T : Any&gt; createService(serviceClass: KClass&lt;T&gt;): T</ID>
+    <ID>CyclomaticComplexMethod:HttpClient.kt$HttpClient.Builder$fun build(): HttpClient</ID>
+    <ID>CyclomaticComplexMethod:HttpClient.kt$HttpClient.Builder$fun isDebugMode(isDebug: Boolean): Builder</ID>
+    <ID>CyclomaticComplexMethod:HttpClient.kt$HttpClient.Builder$fun withConnectionTimeout(seconds: Long): Builder</ID>
+    <ID>CyclomaticComplexMethod:HttpClient.kt$HttpClient.Builder$fun withConverterFactory(converterFactory: Converter.Factory): Builder</ID>
+    <ID>CyclomaticComplexMethod:HttpClient.kt$HttpClient.Builder$fun withReadTimeout(seconds: Long): Builder</ID>
+    <ID>CyclomaticComplexMethod:LastValidUrlShortenerComponent.kt$@Composable fun LastValidShortUrl( modifier: Modifier = Modifier, url: UrlResult, onClick: () -&gt; Unit = {} )</ID>
+    <ID>CyclomaticComplexMethod:LastValidUrlShortenerComponent.kt$@Preview(showBackground = true, showSystemUi = true) @Composable fun LastValidShortUrlPreview()</ID>
+    <ID>CyclomaticComplexMethod:LoadOverlay.kt$@Preview(showBackground = true, showSystemUi = true) @Composable fun LoadingOverlayComponent()</ID>
+    <ID>CyclomaticComplexMethod:MainActivity.kt$@Composable internal fun UrlShortenerScreenApp(modifier: Modifier = Modifier)</ID>
+    <ID>CyclomaticComplexMethod:MainActivity.kt$MainActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
+    <ID>CyclomaticComplexMethod:RepositoryResult.kt$RepositoryResult.Companion$fun &lt;T&gt; onSuccess(data: T)</ID>
+    <ID>CyclomaticComplexMethod:RepositoryResult.kt$RepositoryResult.Companion$fun onError(message: String, code: Int? = null)</ID>
+    <ID>CyclomaticComplexMethod:SafeRepository.kt$SafeRepository$suspend fun &lt;ResponseBody, Domain&gt; remoteCall( call: suspend () -&gt; Response&lt;ResponseBody&gt;, onSuccess: (ResponseBody) -&gt; Domain ): RepositoryResult&lt;Domain&gt;</ID>
+    <ID>CyclomaticComplexMethod:SafeUrl.kt$fun Context.checkUrlSafety( url: String, apiKey: String )</ID>
+    <ID>CyclomaticComplexMethod:ShortenerUrlScreen.kt$@Composable internal fun UrlShortenerScreen( modifier: Modifier = Modifier, urlShortenerViewModel: UrlShortenerViewModel, )</ID>
+    <ID>CyclomaticComplexMethod:ShortenerUrlScreen.kt$@Composable private fun UrlShortenerForm( modifier: Modifier = Modifier, urlShortenerViewModel: UrlShortenerViewModel = viewModel(factory = UrlShortenerViewModel.FACTORY), )</ID>
+    <ID>CyclomaticComplexMethod:ShortenerUrlScreen.kt$@Preview(showBackground = true) @Composable private fun UrlShortenerFormPreview()</ID>
+    <ID>CyclomaticComplexMethod:SplashScreen.kt$@Preview(showBackground = true, showSystemUi = true) @Composable fun SplashScreen( modifier: Modifier = Modifier, onClose: () -&gt; Unit = {} )</ID>
+    <ID>CyclomaticComplexMethod:Theme.kt$@Composable fun URLShortenerTheme( darkTheme: Boolean = isSystemInDarkTheme(), // Dynamic color is available on Android 12+ dynamicColor: Boolean = true, content: @Composable () -&gt; Unit )</ID>
+    <ID>CyclomaticComplexMethod:UrlDetailScreen.kt$@Composable fun UrlDetailScreen( url: String, onBackPressed: () -&gt; Unit = {} )</ID>
+    <ID>CyclomaticComplexMethod:UrlDetailScreen.kt$@Preview(showBackground = true) @Composable fun UrlDetailScreenPreview()</ID>
+    <ID>CyclomaticComplexMethod:UrlShortener.kt$UrlShortener.Companion$fun createFromGetResult(url: String): UrlShortener</ID>
+    <ID>CyclomaticComplexMethod:UrlShortener.kt$UrlShortener.Companion$fun createToPostUrl(url: String): UrlShortener</ID>
+    <ID>CyclomaticComplexMethod:UrlShortener.kt$UrlShortener.Companion$private fun isValidUrl(url: String): Boolean</ID>
+    <ID>CyclomaticComplexMethod:UrlShortener.kt$UrlShortener.Companion$private fun shortenerUrl(url: String): String</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerApp.kt$@Composable internal fun UrlShortenerApp( modifier: Modifier = Modifier, viewModel: UrlShortenerViewModel = viewModel(factory = UrlShortenerViewModel.FACTORY), navController: NavHostController = rememberNavController() )</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerApp.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable private fun UrlShortenerTopAppBar( currentScreen: NavRoute, canNavigateBack: Boolean, navigateUp: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerApp.kt$@Preview @Composable private fun UrlShortenerTopAppBarPreview()</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerApp.kt$private fun backToShortenerUrlScreen(navController: NavHostController)</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerClient.kt$UrlShortenerClient$@GET("/api/alias/{id}") suspend fun getUrlShortener(@Path("id") id: String): Response&lt;UrlShortenerDTO&gt;</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerClient.kt$UrlShortenerClient$@POST("/api/alias") suspend fun postUrl(@Body urlShortenerDTO: UrlShortenerDTO): Response&lt;UrlResultDTO&gt;</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerFormComponent.kt$@Composable internal fun UrlShortenerFormComponent( modifier: Modifier = Modifier, urlShortenerViewModel: UrlShortenerViewModel )</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerFormComponent.kt$@Composable private fun UrlShortenerForm( content: String, onContentChange: (String) -&gt; Unit, onSendClick: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerFormComponent.kt$@Preview(showBackground = true, showSystemUi = true) @Composable fun UrlShortenerFormComponentPreview()</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerListComponent.kt$@Composable internal fun UrlShortenerList( modifier: Modifier = Modifier, urls: List&lt;UrlResult&gt;, onClickListener: (String) -&gt; Unit )</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerListComponent.kt$@Composable internal fun UrlShortenerListComponent( modifier: Modifier = Modifier, urls: List&lt;UrlResult&gt;, onClickItem: (String) -&gt; Unit )</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerListComponent.kt$@Preview(showBackground = true) @Composable private fun UrlShortenerListPreview( @PreviewParameter(UrlShortenerListParameterProvider::class) urls: List&lt;UrlResult&gt; )</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerRepository.kt$UrlShortenerRepository$suspend fun getUrlShortener(id: String): RepositoryResult&lt;UrlShortener&gt;</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerRepository.kt$UrlShortenerRepository$suspend fun postUrl(urlShortener: UrlShortener): RepositoryResult&lt;UrlResult&gt;</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerRepositoryDefault.kt$UrlShortenerRepositoryDefault$override suspend fun getUrlShortener(id: String): RepositoryResult&lt;UrlShortener&gt;</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerRepositoryDefault.kt$UrlShortenerRepositoryDefault$override suspend fun postUrl(urlShortener: UrlShortener): RepositoryResult&lt;UrlResult&gt;</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerViewModel.kt$UrlShortenerViewModel$fun onChangeTextFieldContent(newValue: String)</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerViewModel.kt$UrlShortenerViewModel$fun putUiOnIdle()</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerViewModel.kt$UrlShortenerViewModel$fun uiEventInterpreter(uiEvent: UrlShortenerUIEvent)</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerViewModel.kt$UrlShortenerViewModel$private fun clearUrlShortener()</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerViewModel.kt$UrlShortenerViewModel$private fun getUrlShortener(id: String)</ID>
+    <ID>CyclomaticComplexMethod:UrlShortenerViewModel.kt$UrlShortenerViewModel$private fun postUrl(url: String)</ID>
+    <ID>CyclomaticComplexMethod:ViewModelExtensions.kt$inline fun &lt;reified T : ViewModel&gt; ComponentActivity.viewModelBuilder(): Lazy&lt;T&gt;</ID>
+    <ID>MatchingDeclarationName:UrlShortenerApp.kt$NavRoute</ID>
+    <ID>TooGenericExceptionCaught:SafeRepository.kt$SafeRepository$e: Exception</ID>
+    <ID>UseRequire:UrlShortener.kt$UrlShortener.Companion$throw IllegalArgumentException("Invalid URL format")</ID>
+  </CurrentIssues>
+</SmellBaseline>
