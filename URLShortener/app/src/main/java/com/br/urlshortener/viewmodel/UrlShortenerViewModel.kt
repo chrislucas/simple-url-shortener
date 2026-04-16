@@ -102,6 +102,10 @@ class UrlShortenerViewModel(
                         UrlShortenerUIState.Error(message)
                     }
 
+                    /*
+                        delay para garantir que o usuário veja a
+                        mensagem de erro antes de voltar para o estado Idle
+                     */
                     delay(delayMillisOnError)
                     mutableUiState.update { UrlShortenerUIState.Idle }
                     mutableOneShotAppEvent.emit(OneShotAppEvent.ShowError(message))
