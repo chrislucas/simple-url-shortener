@@ -5,7 +5,7 @@ import com.br.urlshortener.domain.model.UrlResult
 import com.br.urlshortener.domain.model.UrlShortener
 import com.br.urlshortener.domain.repository.RepositoryResult
 import com.br.urlshortener.domain.repository.UrlShortenerRepository
-import com.br.urlshortener.ui.event.UrlShortenerEvent
+import com.br.urlshortener.ui.event.OneShotAppEvent
 import com.br.urlshortener.ui.event.UrlShortenerUIEvent
 import com.br.urlshortener.ui.state.UrlShortenerUIState
 import io.mockk.MockKAnnotations
@@ -98,8 +98,8 @@ class UrlShortenerViewModelTest {
         viewModel.onChangeTextFieldContent(url)
         coEvery { repository.postUrl(urlShortener) } returns RepositoryResult.onSuccess(expectedResult)
 
-        val events = mutableListOf<UrlShortenerEvent>()
-        val job = launch { viewModel.navigationEvent.collect { events.add(it) } }
+        val events = mutableListOf<OneShotAppEvent>()
+        val job = launch { viewModel.oneShotAppEvent.collect { events.add(it) } }
 
         viewModel.uiEventInterpreter(UrlShortenerUIEvent.PostShortUrlEvent)
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Loading)
@@ -111,8 +111,8 @@ class UrlShortenerViewModelTest {
         assertTrue(viewModel.urls.value.contains(expectedResult))
 
         assertEquals(1, events.size)
-        assertTrue(events[0] is UrlShortenerEvent.ShowSnackBar)
-        assertEquals("URL encurtada com sucesso", (events[0] as UrlShortenerEvent.ShowSnackBar).message)
+        assertTrue(events[0] is OneShotAppEvent.ShowSnackBar)
+        assertEquals("URL encurtada com sucesso", (events[0] as OneShotAppEvent.ShowSnackBar).message)
 
         job.cancel()
     }
@@ -122,8 +122,8 @@ class UrlShortenerViewModelTest {
         val invalidUrl = "not-a-valid-url"
         viewModel.onChangeTextFieldContent(invalidUrl)
 
-        val events = mutableListOf<UrlShortenerEvent>()
-        val job = launch { viewModel.navigationEvent.collect { events.add(it) } }
+        val events = mutableListOf<OneShotAppEvent>()
+        val job = launch { viewModel.oneShotAppEvent.collect { events.add(it) } }
 
         viewModel.uiEventInterpreter(UrlShortenerUIEvent.PostShortUrlEvent)
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Loading)
@@ -133,8 +133,8 @@ class UrlShortenerViewModelTest {
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Idle)
 
         assertEquals(1, events.size)
-        assertTrue(events[0] is UrlShortenerEvent.ShowError)
-        assertEquals("Invalid URL format: $invalidUrl", (events[0] as UrlShortenerEvent.ShowError).message)
+        assertTrue(events[0] is OneShotAppEvent.ShowError)
+        assertEquals("Invalid URL format: $invalidUrl", (events[0] as OneShotAppEvent.ShowError).message)
 
         job.cancel()
     }
@@ -160,8 +160,8 @@ class UrlShortenerViewModelTest {
         viewModel.onChangeTextFieldContent(url)
         coEvery { repository.postUrl(urlShortener) } returns RepositoryResult.onError("Server Error", 500)
 
-        val events = mutableListOf<UrlShortenerEvent>()
-        val job = launch { viewModel.navigationEvent.collect { events.add(it) } }
+        val events = mutableListOf<OneShotAppEvent>()
+        val job = launch { viewModel.oneShotAppEvent.collect { events.add(it) } }
 
         viewModel.uiEventInterpreter(UrlShortenerUIEvent.PostShortUrlEvent)
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Loading)
@@ -172,8 +172,8 @@ class UrlShortenerViewModelTest {
         assertTrue(viewModel.urls.value.isEmpty())
 
         assertEquals(1, events.size)
-        assertTrue(events[0] is UrlShortenerEvent.ShowError)
-        val errorEvent = events[0] as UrlShortenerEvent.ShowError
+        assertTrue(events[0] is OneShotAppEvent.ShowError)
+        val errorEvent = events[0] as OneShotAppEvent.ShowError
         assertTrue(errorEvent.message.contains("Server Error"))
         assertTrue(errorEvent.message.contains("500"))
 
@@ -200,8 +200,8 @@ class UrlShortenerViewModelTest {
         )
         coEvery { repository.getUrlShortener(id) } returns RepositoryResult.onSuccess(expectedResult)
 
-        val events = mutableListOf<UrlShortenerEvent>()
-        val job = launch { viewModel.navigationEvent.collect { events.add(it) } }
+        val events = mutableListOf<OneShotAppEvent>()
+        val job = launch { viewModel.oneShotAppEvent.collect { events.add(it) } }
 
         viewModel.uiEventInterpreter(UrlShortenerUIEvent.GetShortUrlEvent(id))
         advanceUntilIdle()
@@ -211,7 +211,7 @@ class UrlShortenerViewModelTest {
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Idle)
 
         assertEquals(1, events.size)
-        assertTrue(events[0] is UrlShortenerEvent.NavigateToDetail)
+        assertTrue(events[0] is OneShotAppEvent.NavigateToDetail)
 
         job.cancel()
     }

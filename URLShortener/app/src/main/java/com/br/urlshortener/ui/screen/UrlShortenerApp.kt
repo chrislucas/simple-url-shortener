@@ -32,7 +32,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.br.urlshortener.R
-import com.br.urlshortener.ui.event.UrlShortenerEvent
+import com.br.urlshortener.ui.event.OneShotAppEvent
 import com.br.urlshortener.viewmodel.UrlShortenerViewModel
 
 enum class NavRoute(@field:StringRes val title: Int) {
@@ -60,17 +60,17 @@ internal fun UrlShortenerApp(
     val urlShortener by viewModel.urlShortener.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.navigationEvent.collect { event ->
+        viewModel.oneShotAppEvent.collect { event ->
             when (event) {
-                is UrlShortenerEvent.NavigateToDetail -> {
+                is OneShotAppEvent.NavigateToDetail -> {
                     navController.navigate(NavRoute.UrlDetailScreenRoute.name)
                 }
 
-                is UrlShortenerEvent.ShowSnackBar -> {
+                is OneShotAppEvent.ShowSnackBar -> {
                     snackBarHostState.showSnackbar(event.message)
                 }
 
-                is UrlShortenerEvent.ShowError -> {
+                is OneShotAppEvent.ShowError -> {
                     snackBarHostState.showSnackbar(message = event.message)
                 }
             }

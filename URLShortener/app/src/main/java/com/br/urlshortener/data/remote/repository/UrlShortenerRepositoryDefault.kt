@@ -9,8 +9,7 @@ import com.br.urlshortener.domain.repository.RepositoryResult
 import com.br.urlshortener.domain.repository.SafeRepository
 import com.br.urlshortener.domain.repository.UrlShortenerRepository
 
-class UrlShortenerRepositoryDefault(private val client: UrlShortenerClient) :
-    UrlShortenerRepository {
+class UrlShortenerRepositoryDefault(private val client: UrlShortenerClient) : UrlShortenerRepository {
 
     override suspend fun postUrl(urlShortener: UrlShortener): RepositoryResult<UrlResult> {
         val call = suspend { client.postUrl(UrlShortenerDTO(urlShortener.url)) }

@@ -12,7 +12,7 @@ import com.br.urlshortener.domain.model.UrlResult
 import com.br.urlshortener.domain.model.UrlShortener
 import com.br.urlshortener.domain.repository.RepositoryResult
 import com.br.urlshortener.domain.repository.UrlShortenerRepository
-import com.br.urlshortener.ui.event.UrlShortenerEvent
+import com.br.urlshortener.ui.event.OneShotAppEvent
 import com.br.urlshortener.ui.event.UrlShortenerUIEvent
 import com.br.urlshortener.ui.state.UrlShortenerUIState
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.time.delay
 import kotlin.coroutines.CoroutineContext
 
 class UrlShortenerViewModel(
@@ -48,16 +47,12 @@ class UrlShortenerViewModel(
     private val mutableUrlShortener = MutableStateFlow<UrlShortener?>(null)
     val urlShortener: StateFlow<UrlShortener?> = mutableUrlShortener.asStateFlow()
 
-    private val mutableNavigationEvent = MutableSharedFlow<UrlShortenerEvent>(replay = 0, extraBufferCapacity = 1)
-    val navigationEvent: SharedFlow<UrlShortenerEvent> = mutableNavigationEvent.asSharedFlow()
+    private val mutableOneShotAppEvent = MutableSharedFlow<OneShotAppEvent>(replay = 0, extraBufferCapacity = 1)
+    val oneShotAppEvent: SharedFlow<OneShotAppEvent> = mutableOneShotAppEvent.asSharedFlow()
 
     fun putUiOnIdle() {
         mutableUiState.update { UrlShortenerUIState.Idle }
         clearUrlShortener()
-    }
-
-    private fun clearUrlShortener() {
-        mutableUrlShortener.update { null }
     }
 
     fun onChangeTextFieldContent(newValue: String) {
@@ -89,7 +84,7 @@ class UrlShortenerViewModel(
                 delay(delayMillisOnError)
 
                 mutableUiState.update { UrlShortenerUIState.Idle }
-                mutableNavigationEvent.emit(UrlShortenerEvent.ShowError(message))
+                mutableOneShotAppEvent.emit(OneShotAppEvent.ShowError(message))
                 return@launch
             }
 
@@ -97,7 +92,7 @@ class UrlShortenerViewModel(
                 is RepositoryResult.Success -> {
                     shortUrls.update { currentShortUrls -> currentShortUrls + result.data }
                     mutableUiState.update { UrlShortenerUIState.Idle }
-                    mutableNavigationEvent.emit(UrlShortenerEvent.ShowSnackBar("URL encurtada com sucesso"))
+                    mutableOneShotAppEvent.emit(OneShotAppEvent.ShowSnackBar("URL encurtada com sucesso"))
                 }
 
                 is RepositoryResult.Error -> {
@@ -109,7 +104,7 @@ class UrlShortenerViewModel(
 
                     delay(delayMillisOnError)
                     mutableUiState.update { UrlShortenerUIState.Idle }
-                    mutableNavigationEvent.emit(UrlShortenerEvent.ShowError(message))
+                    mutableOneShotAppEvent.emit(OneShotAppEvent.ShowError(message))
                 }
             }
         }
@@ -121,19 +116,23 @@ class UrlShortenerViewModel(
                 is RepositoryResult.Success -> {
                     mutableUrlShortener.update { result.data }
                     mutableUiState.update { UrlShortenerUIState.Idle }
-                    mutableNavigationEvent.emit(UrlShortenerEvent.NavigateToDetail)
+                    mutableOneShotAppEvent.emit(OneShotAppEvent.NavigateToDetail)
                 }
 
                 is RepositoryResult.Error -> {
                     mutableUiState.update { UrlShortenerUIState.Idle }
-                    mutableNavigationEvent.emit(
-                        UrlShortenerEvent.ShowError(
+                    mutableOneShotAppEvent.emit(
+                        OneShotAppEvent.ShowError(
                             "Get Url Shortener Error.\nMessage: ${result.message}. Status Code: ${result.code}"
                         )
                     )
                 }
             }
         }
+    }
+
+    private fun clearUrlShortener() {
+        mutableUrlShortener.update { null }
     }
 
     companion object {

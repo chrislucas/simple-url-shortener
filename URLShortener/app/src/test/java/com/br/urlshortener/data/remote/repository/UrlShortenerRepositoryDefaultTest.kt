@@ -68,7 +68,7 @@ class UrlShortenerRepositoryDefaultTest {
         val url = "https://example.com"
         val urlShortener = UrlShortener.createToPostUrl(url)
         val urlShortenerDTO = UrlShortenerDTO(tinyUrl = urlShortener.url)
-        val errorBody = "\"Error message\"".toResponseBody(null)
+        val errorBody = "{\"message\": \"Error message\"}".toResponseBody(null)
         coEvery { client.postUrl(urlShortenerDTO) } returns Response.error(400, errorBody)
 
         // When
@@ -136,7 +136,7 @@ class UrlShortenerRepositoryDefaultTest {
     fun `getUrlShortener returns error when client returns unsuccessful response`() = runTest {
         // Given
         val id = "alias123"
-        val errorBody = "\"Not Found\"".toResponseBody(null)
+        val errorBody = "{\"message\": \"Not Found\"}".toResponseBody(null)
         coEvery { client.getUrlShortener(id) } returns Response.error(404, errorBody)
 
         // When
