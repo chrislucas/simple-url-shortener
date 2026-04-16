@@ -53,7 +53,6 @@ class UrlShortenerViewModel(
 
     fun putUiOnIdle() {
         mutableUiState.update { UrlShortenerUIState.Idle }
-        clearUrlShortener()
     }
 
     private fun clearUrlShortener() {
