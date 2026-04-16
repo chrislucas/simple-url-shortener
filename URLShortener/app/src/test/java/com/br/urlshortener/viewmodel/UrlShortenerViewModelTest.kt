@@ -14,9 +14,8 @@ import io.mockk.coVerify
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.unmockkAll
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -26,7 +25,6 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import org.junit.jupiter.api.assertThrows
 
 @ExperimentalCoroutinesApi
 class UrlShortenerViewModelTest {
@@ -111,11 +109,11 @@ class UrlShortenerViewModelTest {
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Idle)
         assertEquals(1, viewModel.urls.value.size)
         assertTrue(viewModel.urls.value.contains(expectedResult))
-        
+
         assertEquals(1, events.size)
         assertTrue(events[0] is UrlShortenerEvent.ShowSnackBar)
         assertEquals("URL encurtada com sucesso", (events[0] as UrlShortenerEvent.ShowSnackBar).message)
-        
+
         job.cancel()
     }
 
@@ -133,11 +131,11 @@ class UrlShortenerViewModelTest {
 
         coVerify(exactly = 0) { repository.postUrl(any<UrlShortener>()) }
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Idle)
-        
+
         assertEquals(1, events.size)
         assertTrue(events[0] is UrlShortenerEvent.ShowError)
         assertEquals("Invalid URL format: $invalidUrl", (events[0] as UrlShortenerEvent.ShowError).message)
-        
+
         job.cancel()
     }
 
@@ -211,7 +209,7 @@ class UrlShortenerViewModelTest {
         coVerify { repository.getUrlShortener(id) }
         assertEquals(expectedResult, viewModel.urlShortener.value)
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Idle)
-        
+
         assertEquals(1, events.size)
         assertTrue(events[0] is UrlShortenerEvent.NavigateToDetail)
 
@@ -270,7 +268,7 @@ class UrlShortenerViewModelTest {
     fun `putUiOnIdle resets state`() = runTest {
         viewModel.onChangeTextFieldContent("some text")
         viewModel.putUiOnIdle()
-        
+
         assertTrue(viewModel.uiState.value is UrlShortenerUIState.Idle)
         assertNull(viewModel.urlShortener.value)
     }
