@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.br.urlshortener.BuildConfig
-import com.br.urlshortener.HttpClient
+import com.br.urlshortener.data.remote.HttpClient
 import com.br.urlshortener.data.remote.UrlShortenerClient
 import com.br.urlshortener.domain.model.UrlResult
 import com.br.urlshortener.domain.model.UrlShortener
@@ -53,7 +53,6 @@ class UrlShortenerViewModel(
 
     fun putUiOnIdle() {
         mutableUiState.update { UrlShortenerUIState.Idle }
-        clearUrlShortener()
     }
 
     private fun clearUrlShortener() {
@@ -87,7 +86,6 @@ class UrlShortenerViewModel(
                 val message = "Invalid URL format: $url"
                 mutableUiState.update { UrlShortenerUIState.Error(message) }
                 delay(delayMillisOnError)
-
                 mutableUiState.update { UrlShortenerUIState.Idle }
                 mutableNavigationEvent.emit(UrlShortenerEvent.ShowError(message))
                 return@launch
@@ -106,7 +104,6 @@ class UrlShortenerViewModel(
                     mutableUiState.update {
                         UrlShortenerUIState.Error(message)
                     }
-
                     delay(delayMillisOnError)
                     mutableUiState.update { UrlShortenerUIState.Idle }
                     mutableNavigationEvent.emit(UrlShortenerEvent.ShowError(message))

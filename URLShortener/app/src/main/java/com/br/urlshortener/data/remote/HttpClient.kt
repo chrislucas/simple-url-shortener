@@ -1,4 +1,4 @@
-package com.br.urlshortener
+package com.br.urlshortener.data.remote
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -6,7 +6,6 @@ import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import kotlin.jvm.java
 import kotlin.reflect.KClass
 
 class HttpClient private constructor(
