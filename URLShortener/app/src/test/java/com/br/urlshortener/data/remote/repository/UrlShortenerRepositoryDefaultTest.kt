@@ -5,7 +5,7 @@ import com.br.urlshortener.data.remote.model.LinkDTO
 import com.br.urlshortener.data.remote.model.UrlResultDTO
 import com.br.urlshortener.data.remote.model.UrlShortenerDTO
 import com.br.urlshortener.domain.model.UrlShortener
-import com.br.urlshortener.domain.repository.RepositoryResult
+import com.br.urlshortener.domain.repository.BuilderRepositoryResult
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.impl.annotations.MockK
@@ -55,8 +55,8 @@ class UrlShortenerRepositoryDefaultTest {
         val result = repository.postUrl(urlShortener)
 
         // Then
-        assertTrue(result is RepositoryResult.Success)
-        val successResult = result as RepositoryResult.Success
+        assertTrue(result is BuilderRepositoryResult.Success)
+        val successResult = result as BuilderRepositoryResult.Success
         assertEquals("alias123", successResult.data.alias)
         assertEquals(urlShortener.url, successResult.data.link.self)
         assertEquals("https://short.url/alias123", successResult.data.link.short)
@@ -75,8 +75,8 @@ class UrlShortenerRepositoryDefaultTest {
         val result = repository.postUrl(urlShortener)
 
         // Then
-        assertTrue(result is RepositoryResult.Error)
-        val errorResult = result as RepositoryResult.Error
+        assertTrue(result is BuilderRepositoryResult.Error)
+        val errorResult = result as BuilderRepositoryResult.Error
         assertEquals("Error message", errorResult.message)
         assertEquals(400, errorResult.code)
     }
@@ -93,8 +93,8 @@ class UrlShortenerRepositoryDefaultTest {
         val result = repository.postUrl(urlShortener)
 
         // Then
-        assertTrue(result is RepositoryResult.Error)
-        val errorResult = result as RepositoryResult.Error
+        assertTrue(result is BuilderRepositoryResult.Error)
+        val errorResult = result as BuilderRepositoryResult.Error
         assertEquals("null_body", errorResult.message)
     }
 
@@ -110,8 +110,8 @@ class UrlShortenerRepositoryDefaultTest {
         val result = repository.postUrl(urlShortener)
 
         // Then
-        assertTrue(result is RepositoryResult.Error)
-        val errorResult = result as RepositoryResult.Error
+        assertTrue(result is BuilderRepositoryResult.Error)
+        val errorResult = result as BuilderRepositoryResult.Error
         assertEquals("Network Error", errorResult.message)
         assertEquals(500, errorResult.code)
     }
@@ -127,8 +127,8 @@ class UrlShortenerRepositoryDefaultTest {
         val result = repository.getUrlShortener(id)
 
         // Then
-        assertTrue(result is RepositoryResult.Success)
-        val successResult = result as RepositoryResult.Success
+        assertTrue(result is BuilderRepositoryResult.Success)
+        val successResult = result as BuilderRepositoryResult.Success
         assertEquals("https://example.com", successResult.data.url)
     }
 
@@ -143,8 +143,8 @@ class UrlShortenerRepositoryDefaultTest {
         val result = repository.getUrlShortener(id)
 
         // Then
-        assertTrue(result is RepositoryResult.Error)
-        val errorResult = result as RepositoryResult.Error
+        assertTrue(result is BuilderRepositoryResult.Error)
+        val errorResult = result as BuilderRepositoryResult.Error
         assertEquals("Not Found", errorResult.message)
         assertEquals(404, errorResult.code)
     }
@@ -159,8 +159,8 @@ class UrlShortenerRepositoryDefaultTest {
         val result = repository.getUrlShortener(id)
 
         // Then
-        assertTrue(result is RepositoryResult.Error)
-        val errorResult = result as RepositoryResult.Error
+        assertTrue(result is BuilderRepositoryResult.Error)
+        val errorResult = result as BuilderRepositoryResult.Error
         assertEquals("null_body", errorResult.message)
     }
 
@@ -174,8 +174,8 @@ class UrlShortenerRepositoryDefaultTest {
         val result = repository.getUrlShortener(id)
 
         // Then
-        assertTrue(result is RepositoryResult.Error)
-        val errorResult = result as RepositoryResult.Error
+        assertTrue(result is BuilderRepositoryResult.Error)
+        val errorResult = result as BuilderRepositoryResult.Error
         assertEquals("Not Found Error", errorResult.message)
         assertEquals(500, errorResult.code)
     }

@@ -13,19 +13,19 @@ object SafeRepository {
     suspend fun <ResponseBody, Domain> remoteCall(
         call: suspend () -> Response<ResponseBody>,
         onSuccess: (ResponseBody) -> Domain
-    ): RepositoryResult<Domain> {
+    ): BuilderRepositoryResult<Domain> {
         return try {
             val response = call()
             handleResponse(response, onSuccess)
         } catch (e: Exception) {
-            RepositoryResult.onError(e.message ?: GENERIC_ERROR_MESSAGE, 500)
+            BuilderRepositoryResult.onError(e.message ?: GENERIC_ERROR_MESSAGE, 500)
         }
     }
 
     private fun <ResponseBody, Domain> handleResponse(
         response: Response<ResponseBody>,
         onSuccess: (ResponseBody) -> Domain
-    ): RepositoryResult<Domain> {
+    ): BuilderRepositoryResult<Domain> {
         return if (response.isSuccessful) {
             handleSuccess(response, onSuccess)
         } else {
@@ -36,18 +36,18 @@ object SafeRepository {
     private fun <ResponseBody, Domain> handleSuccess(
         response: Response<ResponseBody>,
         onSuccess: (ResponseBody) -> Domain
-    ): RepositoryResult<Domain> {
+    ): BuilderRepositoryResult<Domain> {
         return response.body()?.let { responseBody ->
-            RepositoryResult.onSuccess(onSuccess(responseBody))
-        } ?: RepositoryResult.onError(NULL_BODY_MESSAGE, response.code())
+            BuilderRepositoryResult.onSuccess(onSuccess(responseBody))
+        } ?: BuilderRepositoryResult.onError(NULL_BODY_MESSAGE, response.code())
     }
 
     private fun <ResponseBody, Domain> handleFailure(
         response: Response<ResponseBody>
-    ): RepositoryResult<Domain> {
+    ): BuilderRepositoryResult<Domain> {
         val errorBodyString = response.errorBody()?.string()
         if (errorBodyString.isNullOrBlank()) {
-            return RepositoryResult.onError(EMPTY_ERROR_MESSAGE, response.code())
+            return BuilderRepositoryResult.onError(EMPTY_ERROR_MESSAGE, response.code())
         }
 
         val message = runCatching {
@@ -58,6 +58,6 @@ object SafeRepository {
             errorDto.message ?: errorDto.error ?: errorBodyString
         }.getOrDefault(errorBodyString)
 
-        return RepositoryResult.onError(message, response.code())
+        return BuilderRepositoryResult.onError(message, response.code())
     }
 }

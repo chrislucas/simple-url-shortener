@@ -10,7 +10,7 @@ import com.br.urlshortener.data.remote.UrlShortenerClient
 import com.br.urlshortener.data.remote.repository.UrlShortenerRepositoryDefault
 import com.br.urlshortener.domain.model.UrlResult
 import com.br.urlshortener.domain.model.UrlShortener
-import com.br.urlshortener.domain.repository.RepositoryResult
+import com.br.urlshortener.domain.repository.BuilderRepositoryResult
 import com.br.urlshortener.domain.repository.UrlShortenerRepository
 import com.br.urlshortener.ui.event.OneShotAppEvent
 import com.br.urlshortener.ui.event.UrlShortenerUIEvent
@@ -89,13 +89,13 @@ class UrlShortenerViewModel(
             }
 
             when (val result = repository.postUrl(urlShortener)) {
-                is RepositoryResult.Success -> {
+                is BuilderRepositoryResult.Success -> {
                     shortUrls.update { currentShortUrls -> currentShortUrls + result.data }
                     mutableUiState.update { UrlShortenerUIState.Idle }
                     mutableOneShotAppEvent.emit(OneShotAppEvent.ShowSnackBar("URL encurtada com sucesso"))
                 }
 
-                is RepositoryResult.Error -> {
+                is BuilderRepositoryResult.Error -> {
                     val message =
                         "Failed to post shorten URL.\nMessage: ${result.message}. Status Code: ${result.code}."
                     mutableUiState.update {
@@ -113,13 +113,13 @@ class UrlShortenerViewModel(
     private fun getUrlShortener(id: String) {
         viewModelScope.launch(coroutineContext) {
             when (val result = repository.getUrlShortener(id)) {
-                is RepositoryResult.Success -> {
+                is BuilderRepositoryResult.Success -> {
                     mutableUrlShortener.update { result.data }
                     mutableUiState.update { UrlShortenerUIState.Idle }
                     mutableOneShotAppEvent.emit(OneShotAppEvent.NavigateToDetail)
                 }
 
-                is RepositoryResult.Error -> {
+                is BuilderRepositoryResult.Error -> {
                     mutableUiState.update { UrlShortenerUIState.Idle }
                     mutableOneShotAppEvent.emit(
                         OneShotAppEvent.ShowError(
