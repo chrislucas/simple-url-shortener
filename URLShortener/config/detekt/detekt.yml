@@ -26,29 +26,53 @@ style:
 
 # configure ktlint and detekt android compose project
 build:
-  maxIssues: 100 # Fail the build if any issues are found
+  maxIssues: 15 # Fail the build if any issues are found
   weights:
-  # complexity: 2
-  # LongParameterList: 1
-  # style: 1
-  # comments: 1
-  # ...
+    complexity: 2
+    LongParameterList: 1
+    style: 1
+    comments: 1
 
 complexity:
   TooManyFunctions:
-    thresholdInFiles: 20
+    thresholdInFiles: 15
+    active: true
     ignoreAnnotatedFunctions: ['Preview']
   LongParameterList:
     # Increase the threshold for parameter count, common in Composable functions
-    functionThreshold: 15
+    functionThreshold: 5
+    constructorThreshold: 6
   CyclomaticComplexMethod:
-    threshold: 1
+    threshold: 15 # rever essa regra
     ignoreNestingFunctions: true
+  LongMethod:
+    threshold: 30 # rever essa regra
+  # https://detekt.dev/docs/1.23.0/rules/complexity#nestedblockdepth
+  NestedBlockDepth:
+    threshold: 3 # rever essa regra
 
+coroutines:
+  GlobalCoroutineUsage:
+    active: true # Disable if you have specific patterns for coroutine usage
+  InjectDispatcher:
+    dispatcherNames: ['IO', 'Default', 'Main']
+    active: true
+performance:
+  ForEachOnRange:
+    active: true # Disable if you have specific patterns for using forEach on ranges
+  CouldBeSequence:
+    active: true # Disable if you have specific patterns for using collections that could be sequences
+  UnnecessaryPartOfBinaryExpression:
+    active: true # Disable if you have specific patterns for binary expressions that may be necessary
 naming:
   FunctionNaming:
     # Allows PascalCase for functions annotated with @Composable
     ignoreAnnotated: [ 'Composable' ]
+potential-bugs:
+  UnnecessarySafeCall:
+    active: true # Disable if you have specific patterns for safe calls that may be necessary
+  UnnecessaryNotNullCheck:
+    active: true # Disable if you have specific patterns for not-null checks that may be necessary
 
 console-reports:
   active: true
