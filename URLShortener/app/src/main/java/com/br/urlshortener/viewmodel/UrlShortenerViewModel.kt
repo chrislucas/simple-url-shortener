@@ -14,6 +14,7 @@ import com.br.urlshortener.domain.repository.BuilderRepositoryResult
 import com.br.urlshortener.domain.repository.UrlShortenerRepository
 import com.br.urlshortener.ui.event.OneShotAppEvent
 import com.br.urlshortener.ui.event.UrlShortenerUIEvent
+import com.br.urlshortener.ui.state.UrlShortenerScreenState
 import com.br.urlshortener.ui.state.UrlShortenerUIState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -32,6 +33,16 @@ class UrlShortenerViewModel(
     private val coroutineContext: CoroutineContext = Dispatchers.IO,
     private val delayMillisOnError: Long = 2000L
 ) : ViewModel() {
+
+    private val mutableStateUrlShortenerUiEvent: MutableStateFlow<UrlShortenerScreenState> = MutableStateFlow(
+        UrlShortenerScreenState(
+            textFieldContent = "",
+            urls = emptySet(),
+            uiStatus = UrlShortenerUIState.Idle,
+            selectedDetail = null
+        )
+    )
+    val stateUrlShortenerUiEvent: StateFlow<UrlShortenerScreenState?> = mutableStateUrlShortenerUiEvent.asStateFlow()
 
     private val mutableTextFieldContent: MutableStateFlow<String> = MutableStateFlow("")
     val textFieldContent: StateFlow<String> = mutableTextFieldContent.asStateFlow()
