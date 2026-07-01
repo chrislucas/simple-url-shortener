@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.br.urlshortener.R
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 
 @Preview(showBackground = true, showSystemUi = true)
@@ -38,7 +39,7 @@ fun SplashScreen(
                 }
             )
         )
-        delay(1000L)
+        delay(1000L.milliseconds)
         onClose()
     }
     Column(

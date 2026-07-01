@@ -53,7 +53,7 @@ internal fun UrlShortenerApp(
     val currentScreen = NavRoute.valueOf(backStackEntry?.destination?.route ?: NavRoute.SplashScreenRoute.name)
 
     val backToShortenerUrlScreen: () -> Unit = {
-        backToShortenerUrlScreen(navController)
+        navController.backToShortenerUrlScreen()
         viewModel.putUiOnIdle()
     }
 
@@ -108,7 +108,9 @@ internal fun UrlShortenerApp(
             }
 
             composable(route = NavRoute.UrlDetailScreenRoute.name) {
-                urlShortener?.let { UrlDetailScreen(it.url, backToShortenerUrlScreen) }
+                urlShortener?.let {
+                    UrlDetailScreen(it.url, backToShortenerUrlScreen)
+                }
             }
         }
     }
@@ -145,8 +147,8 @@ private fun UrlShortenerTopAppBar(
     )
 }
 
-private fun backToShortenerUrlScreen(navController: NavHostController) {
-    navController.popBackStack(NavRoute.ShortenerUrlScreenRoute.name, inclusive = false)
+private fun NavHostController.backToShortenerUrlScreen() {
+    popBackStack(NavRoute.ShortenerUrlScreenRoute.name, inclusive = false)
 }
 
 @Preview

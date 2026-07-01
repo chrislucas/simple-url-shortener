@@ -19,14 +19,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             URLShortenerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    UrlShortenerScreenApp(modifier = Modifier.padding(innerPadding))
+                    UrlShortenerApp(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
     }
-}
-
-@Composable
-internal fun UrlShortenerScreenApp(modifier: Modifier = Modifier) {
-    UrlShortenerApp(modifier = modifier)
 }

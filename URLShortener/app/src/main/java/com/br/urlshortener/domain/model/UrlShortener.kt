@@ -6,6 +6,8 @@ import java.security.MessageDigest
 @JvmInline
 value class UrlShortener private constructor(val url: String) {
     companion object {
+
+        const val DOMAIN = "ushtnr.ly"
         fun createToPostUrl(url: String): UrlShortener {
             val tinyUrl = shortenerUrl(url)
             return if (isValidUrl(url) && isValidUrl(tinyUrl)) {
@@ -31,9 +33,8 @@ value class UrlShortener private constructor(val url: String) {
             val digest = MessageDigest.getInstance("SHA-256")
             val hashBytes = digest.digest(url.toByteArray(Charsets.UTF_8))
             val hashHex = hashBytes.joinToString("") { "%02x".format(it) }
-            val domain = hashHex.substring(0, 8)
             val path = hashHex.substring(8, 16)
-            return "$scheme://$domain.com/$path"
+            return "$scheme://$DOMAIN.com/$path"
         }
     }
 }
