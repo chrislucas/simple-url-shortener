@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.milliseconds
 
 class UrlShortenerViewModel(
     private val repository: UrlShortenerRepository,
@@ -92,7 +93,7 @@ class UrlShortenerViewModel(
             } catch (_: Exception) {
                 val message = "Invalid URL format: $url"
                 mutableUiState.update { UrlShortenerUIState.Error(message) }
-                delay(delayMillisOnError)
+                delay(delayMillisOnError.milliseconds)
 
                 mutableUiState.update { UrlShortenerUIState.Idle }
                 mutableOneShotAppEvent.emit(OneShotAppEvent.ShowError(message))
